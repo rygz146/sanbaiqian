@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>三百千</title>
+</head>
+<body>
+{{ users }}
+<hr>
+{{ schools }}
+<hr>
+{% for school in schools %}
+    {{ school.city.city_id }}
+    {{ school.name }}<br>
+{% endfor %}
+<hr>
+{{ cities }}
+</body>
+</html>
