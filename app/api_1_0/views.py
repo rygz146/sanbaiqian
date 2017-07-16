@@ -20,4 +20,5 @@ def api_before_request():
 def get_auth_token():
     token = current_user.generate_auth_token(3600)
     print User.verify_auth_token(token)
+
     return jsonify({'token': token})

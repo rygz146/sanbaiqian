@@ -4,8 +4,10 @@
 # @Author : trl
 from flask import Flask
 from .models import db, user
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_principal import Principal, identity_loaded, UserNeed, RoleNeed
+from .forms import csrf
 
 
 login_manager = LoginManager()
@@ -21,6 +23,7 @@ def load_user(user_id):
 
 
 toolbar = DebugToolbarExtension()
+principal = Principal()
 
 
 def create_app(config_name):
@@ -31,6 +34,27 @@ def create_app(config_name):
     db.init_app(app)
     login_manager.init_app(app)
     toolbar.init_app(app)
+    principal.init_app(app)
+    csrf.init_app(app)
+
+    @identity_loaded.connect_via(app)
+    def on_identity_loaded(sender, identity):
+        """Change the role via add the Need object into Role.
+
+           Need the access the app object.
+        """
+
+        # Set the identity user object
+        identity.user = current_user
+
+        # Add the UserNeed to the identity user object
+        if hasattr(current_user, 'id'):
+            identity.provides.add(UserNeed(current_user.id))
+
+        # Add each role to the identity user object
+        if hasattr(current_user, 'roles'):
+            for role in current_user.roles:
+                identity.provides.add(RoleNeed(role.name))
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

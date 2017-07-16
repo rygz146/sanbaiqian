@@ -3,27 +3,44 @@
 # @Date   : 2017/7/12
 # @Author : trl
 from . import auth
-from app.models.user import User
-from flask_login import login_user, current_user, logout_user
-from flask import render_template
+from ..models.user import User, teacher_permission
+from flask_login import login_user, logout_user, login_required
+from flask import render_template, current_app, redirect, request, url_for
+from flask_principal import identity_changed, Identity, AnonymousIdentity
+from ..forms.user import LoginForm
 
 
 @auth.route('/')
 def main():
-    u = User.query.get(1)
-    login_user(user=u)
-
+    users = User.query.all()
+    form = LoginForm()
     return render_template(
-        'login.html'
+        'auth.html',
+        users=users,
+        form=form
     )
 
 
 @auth.route('/login')
 def login():
-    if current_user:
-        logout_user()
-        print current_user
+    u = User.query.get(4)
+    login_user(user=u)
+    identity_changed.send(
+        current_app._get_current_object(),
+        identity=Identity(u.id)
+    )
 
     return render_template(
         'login.html'
     )
+
+
+@auth.route('/logout')
+def logout():
+    logout_user()
+    identity_changed.send(
+        current_app._get_current_object(),
+        identity=AnonymousIdentity()
+    )
+
+    return redirect(url_for('.main'))

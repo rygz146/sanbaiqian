@@ -5,7 +5,7 @@
 from flask import jsonify
 
 
-def json_response(flag, code, msg, data):
-    ret = dict(flag=flag, code=code, msg=msg, data=data)
+def json_response(code, msg, data):
+    ret = dict(code=code, msg=msg, data=data)
 
     return jsonify(ret)

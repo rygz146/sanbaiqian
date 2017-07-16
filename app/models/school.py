@@ -3,6 +3,9 @@
 # @Date   : 2017/7/12
 # @Author : trl
 from . import db
+from sqlalchemy.exc import IntegrityError
+from random import seed
+import forgery_py
 
 
 class City(db.Model):
@@ -18,10 +21,6 @@ class City(db.Model):
 
     @staticmethod
     def generate_fake(count=10):
-        from sqlalchemy.exc import IntegrityError
-        from random import seed
-        import forgery_py
-
         seed()
         for i in range(count):
             c = City(province=forgery_py.address.country(),
@@ -49,10 +48,6 @@ class School(db.Model):
 
     @staticmethod
     def generate_fake(count=10):
-        from sqlalchemy.exc import IntegrityError
-        from random import seed
-        import forgery_py
-
         seed()
         for i in range(count):
             s = School(name=forgery_py.internet.user_name(),

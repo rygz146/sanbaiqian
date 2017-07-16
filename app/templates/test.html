@@ -5,7 +5,10 @@
     <title>三百千</title>
 </head>
 <body>
-{{ users }}
+{% for user in users %}
+    {{ user.username }}
+{% endfor %}
+
 <hr>
 {{ schools }}
 <hr>
@@ -15,5 +18,14 @@
 {% endfor %}
 <hr>
 {{ cities }}
+<hr>
+{% for user in users %}
+    {{ user.roles.all() }}
+{% endfor %}
+<hr>
+{% for role in roles %}
+    {{ role.users.all() }}
+    <hr>
+{% endfor %}
 </body>
 </html>
