@@ -9,6 +9,9 @@ import forgery_py
 
 
 class City(db.Model):
+    """
+    省市（区）县邮政编码
+    """
     __tablename__ = 'edu_city_code'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -35,7 +38,7 @@ class City(db.Model):
                 db.session.rollback()
 
     def __repr__(self):
-        return '<City {}>'.format(self.city_id)
+        return '<City id: {}>'.format(self.id)
 
 
 class School(db.Model):
@@ -43,6 +46,7 @@ class School(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), nullable=False)
+    address = db.Column(db.String(256))
     create_time = db.Column(db.DateTime(), default=db.func.now())
     city_id = db.Column(db.Integer, db.ForeignKey('edu_city_code.id'))
 
@@ -52,6 +56,7 @@ class School(db.Model):
         for i in range(count):
             s = School(name=forgery_py.internet.user_name(),
                        create_time=forgery_py.date.date(),
+                       address=forgery_py.address.street_address(),
                        city_id=i+1)
             db.session.add(s)
             try:
@@ -60,4 +65,4 @@ class School(db.Model):
                 db.session.rollback()
 
     def __repr__(self):
-        return '<School {}>'.format(self.name)
+        return '<School id: {}>'.format(self.id)

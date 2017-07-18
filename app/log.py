@@ -89,4 +89,4 @@ class Logger(object):
             self._logger.error(msg)
 
 
-slow_query_log = Logger('slow_query_log', 'slow_query_log')
+slow_query_log = Logger('slow_query_log', 'slow_query_log.log')

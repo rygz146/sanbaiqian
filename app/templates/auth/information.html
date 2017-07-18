@@ -1,0 +1,22 @@
+{% extends '__include/base.html' %}
+
+{% block nav %}
+    {% include '__include/nav.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="cards">
+        <div class="card">
+            <div class="card-header"><h5>{{ current_user.username }}</h5></div>
+            <div class="card-body">
+                <ul>
+                    <li>{{ current_user.uniqueID }}</li>
+                    {% for role in current_user.roles.all() %}
+                    <li><a href="{{ url_for(role.name+'.index') }}">进入{{ role.name }}界面</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer center text-center"><p>创建于 {{ current_user.create_time }}</p></div>
+        </div>
+    </div>
+{% endblock %}

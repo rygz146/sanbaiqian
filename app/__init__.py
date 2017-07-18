@@ -56,13 +56,33 @@ def create_app(config_name):
             for role in current_user.roles:
                 identity.provides.add(RoleNeed(role.name))
 
+    @app.errorhandler(404)
+    def app_400(request):
+        return '{code}: {name}'.format(code=request.code, name=request.name)
+
+    @app.template_filter('gender')
+    def gender(gen):
+        return '男' if gen else '女'
+
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
     from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    app.register_blueprint(auth_blueprint)
 
     from .api_1_0 import api as api_blueprint
-    app.register_blueprint(api_blueprint, url_prefix='/api')
+    app.register_blueprint(api_blueprint)
+
+    from .admin import admin as admin_blueprint
+    app.register_blueprint(admin_blueprint)
+
+    from .teacher import teacher as teacher_blueprint
+    app.register_blueprint(teacher_blueprint)
+
+    from .parent import parent as parent_blueprint
+    app.register_blueprint(parent_blueprint)
+
+    from .root import root as root_blueprint
+    app.register_blueprint(root_blueprint)
 
     return app

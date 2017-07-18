@@ -14,11 +14,10 @@ import forgery_py
 import uuid
 
 
-ROLES = ['root', 'admin', 'user', 'teacher', 'parent']
+ROLES = ['root', 'admin', 'teacher', 'parent']
 
 root_permission = Permission(RoleNeed('root'))
 admin_permission = Permission(RoleNeed('admin'))
-user_permission = Permission(RoleNeed('user'))
 teacher_permission = Permission(RoleNeed('teacher'))
 parent_permission = Permission(RoleNeed('parent'))
 
@@ -27,7 +26,7 @@ class Role(db.Model):
     __tablename__ = 'edu_role'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), unique=True)
+    name = db.Column(db.String(32), unique=True)
     description = db.Column(db.String(255))
 
     @staticmethod
@@ -40,7 +39,7 @@ class Role(db.Model):
                 db.session.commit()
 
     def __repr__(self):
-        return "<Role {}>".format(self.name)
+        return "<Role id: {}>".format(self.id)
 
 
 user_role = db.Table(
@@ -56,8 +55,10 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
+    gender = db.Column(db.Boolean, default=True)
+    phone = db.Column(db.String(20), unique=True)
     create_time = db.Column(db.DateTime(), default=db.func.now())
-    uuid = db.Column(db.String(45), unique=True)
+    uniqueID = db.Column(db.String(32), unique=True)
     roles = db.relationship(
         'Role',
         secondary=user_role,
@@ -97,11 +98,11 @@ class User(db.Model, UserMixin):
     def generate_fake(count=100):
         seed()
         for i in range(count):
-            r = Role.query.get(choice([1, 2, 3, 4, 5]))
-            u = User(
-                username=forgery_py.internet.user_name(True),
-                password='123456'
-            )
+            r = Role.query.get(choice([1, 2, 3, 4]))
+            u = User(username=forgery_py.internet.user_name(True),
+                     password='123456',
+                     gender=choice([True, False]),
+                     phone=forgery_py.address.phone())
             u.roles.append(r)
             db.session.add(u)
             try:
@@ -111,7 +112,7 @@ class User(db.Model, UserMixin):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        self.uuid = str(uuid.uuid4())
+        self.uniqueID = uuid.uuid4().hex
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<User id: {}>'.format(self.id)

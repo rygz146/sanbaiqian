@@ -1,17 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# @Date   : 2017/7/12
+# @Date   : 2017/7/18
 # @Author : trl
 from flask import Blueprint
 
-auth = Blueprint(
-    'auth',
+parent = Blueprint(
+    'parent',
     __name__,
-    url_prefix='/auth',
-    static_folder='static'
+    url_prefix='/parent'
 )
 
 from . import (
     views,
-    errors
 )
