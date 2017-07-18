@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+
     <div class="cards">
         <div class="card">
             <div class="card-header"><h5>{{ current_user.username }}</h5></div>
@@ -19,4 +20,11 @@
             <div class="card-footer center text-center"><p>创建于 {{ current_user.create_time }}</p></div>
         </div>
     </div>
+
+    <form method=POST enctype=multipart/form-data action="{{ url_for('auth.upload') }}">
+        {{ form.hidden_tag() }}
+        {{ form.upload.lable }} {{ form.upload(required='required') }}
+        {{ form.submit }}
+    </form>
+
 {% endblock %}

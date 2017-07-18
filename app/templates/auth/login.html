@@ -1,11 +1,29 @@
 {% extends '__include/base.html' %}
 
 {% block content %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class=flashes>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <form action="{{ url_for('auth.login') }}" method="post">
         {{ form.hidden_tag() }}
-        {{ form.username.label }} {{ form.username(required='required') }} {% for error in form.username.errors %}<strong>{{ error }}</strong>{% endfor %}<br>
-        {{ form.password.label }} {{ form.password(required='required') }} {% for error in form.password.errors %}<strong>{{ error }}</strong>{% endfor %}<br>
+        {{ form.username.label }} {{ form.username(required='required') }}
+        {% for error in form.username.errors %}
+            <strong style="color: red">{{ error }}</strong><br>
+        {% endfor %}
+        {{ form.password.label }} {{ form.password(require='required') }}
+        {% for error in form.password.errors %}
+            <strong style="color: red">{{ error }}</strong><br>
+        {% endfor %}
         {{ form.submit }}
         <a href="{{ url_for('auth.index') }}"><button type="button">返回</button></a>
     </form>
+
 {% endblock %}

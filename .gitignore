@@ -105,3 +105,4 @@ gen
 log/
 *.db
 migrations/
+uploads/

@@ -8,6 +8,8 @@ from flask_login import LoginManager, current_user
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_principal import Principal, identity_loaded, UserNeed, RoleNeed
 from .forms import csrf
+from flask_uploads import configure_uploads, patch_request_class
+from .upload import files
 
 
 login_manager = LoginManager()
@@ -36,6 +38,8 @@ def create_app(config_name):
     toolbar.init_app(app)
     principal.init_app(app)
     csrf.init_app(app)
+    configure_uploads(app, files)
+    patch_request_class(app, 128 * 1024 * 1024)
 
     @identity_loaded.connect_via(app)
     def on_identity_loaded(sender, identity):
