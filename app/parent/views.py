@@ -7,7 +7,7 @@ from ..models.user import parent_permission
 from flask import abort
 from ..log import Logger
 
-parent_log = Logger('parent_log', 'parent_log.log', True)
+parent_log = Logger('parent_log', 'parent.log', True)
 
 
 @parent.before_request

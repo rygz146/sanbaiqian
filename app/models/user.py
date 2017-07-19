@@ -59,6 +59,7 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(20), unique=True)
     create_time = db.Column(db.DateTime(), default=db.func.now())
     uniqueID = db.Column(db.String(32), unique=True)
+    files = db.relationship('UploadFile', backref='user', lazy='dynamic')
     roles = db.relationship(
         'Role',
         secondary=user_role,
@@ -116,3 +117,21 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return '<User id: {}>'.format(self.id)
+
+
+class UploadFile(db.Model):
+    __tablename__ = 'edu_upload_file'
+
+    id = db.Column(db.Integer, primary_key=True)
+    path = db.Column(db.String(256), nullable=False)
+    name = db.Column(db.String(256), nullable=False)
+    size = db.Column(db.String(128), nullable=False)
+    md5_name = db.Column(db.String(32), nullable=False)
+    create_time = db.Column(db.DateTime(), default=db.func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('edu_user.id'))
+
+    def __init__(self, **kwargs):
+        super(UploadFile, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return '<UploadFile id: {}>'.format(self.id)

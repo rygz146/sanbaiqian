@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from app.models.user import User
 from app.log import Logger
 
-api_log = Logger('api_log', 'api_log.log', True)
+api_log = Logger('api_log', 'api.log', True)
 
 
 @api.before_request

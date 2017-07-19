@@ -7,7 +7,7 @@ from ..models.user import teacher_permission
 from ..log import Logger
 from flask import abort
 
-teacher_log = Logger('teacher_log', 'teacher_log.log', True)
+teacher_log = Logger('teacher_log', 'teacher.log', True)
 
 
 @teacher.before_request

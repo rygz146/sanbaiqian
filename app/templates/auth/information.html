@@ -1,10 +1,22 @@
 {% extends '__include/base.html' %}
 
+{% from 'macro/pagination.html' import render_pagination%}
+
 {% block nav %}
     {% include '__include/nav.html' %}
 {% endblock %}
 
 {% block content %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class=flashes>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
     <div class="cards">
         <div class="card">
@@ -21,10 +33,40 @@
         </div>
     </div>
 
-    <form method=POST enctype=multipart/form-data action="{{ url_for('auth.upload') }}">
+    <form action="{{ url_for('auth.upload') }}" method="post" enctype="multipart/form-data" >
         {{ form.hidden_tag() }}
-        {{ form.upload.lable }} {{ form.upload(required='required') }}
+        {{ form.files.lable }} {{ form.files(required='required', multiple="multiple") }}
+        {% for error in form.files.errors %}
+            <strong style="color: red">{{ error }}</strong><br>
+        {% endfor %}
         {{ form.submit }}
     </form>
+
+    <table>
+        <thead>
+        <tr>
+            <td></td>
+            <td>文件</td>
+            <td>大小</td>
+            <td>创建时间</td>
+            <td>操作</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for f in files %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ f.path }}</td>
+                <td>{{ f.size }}</td>
+                <td>{{ f.create_time }}</td>
+                <td><a href="{{ url_for('auth.download', file_id=f.id) }}">下载</a> | <a href="">删除</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pagination %}
+        {{ render_pagination(pagination, 'auth.information') }}
+    {% endif %}
 
 {% endblock %}

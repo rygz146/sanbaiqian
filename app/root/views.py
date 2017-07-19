@@ -7,7 +7,7 @@ from ..models.user import root_permission
 from ..log import Logger
 from flask import abort
 
-root_log = Logger('root_log', 'root_log.log', True)
+root_log = Logger('root_log', 'root.log', True)
 
 
 @root.before_request

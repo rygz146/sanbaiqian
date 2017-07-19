@@ -7,7 +7,7 @@ from ..models.user import admin_permission
 from ..log import Logger
 from flask import abort
 
-admin_log = Logger('admin_log', 'admin_log.log', True)
+admin_log = Logger('admin_log', 'admin.log', True)
 
 
 @admin.before_request
