@@ -5,7 +5,8 @@
 from . import auth
 from ..models.user import db, User, UploadFile
 from flask_login import login_user, logout_user, login_required, current_user
-from flask import render_template, current_app, redirect, request, url_for, flash, abort, send_from_directory
+from flask import render_template, current_app, redirect, request, url_for, \
+    flash, abort, send_from_directory
 from flask_principal import identity_changed, Identity, AnonymousIdentity
 from ..forms.user import LoginForm, RegisterForm
 from ..forms.upload import UploadForm
@@ -107,16 +108,20 @@ def upload():
         upload_files = form.files.raw_data
         for f in upload_files:
             real_name = f.filename
-            md5_name = md5(f.filename).hexdigest() + '.{}'.format(f.filename.split('.')[1])
+            md5_name = md5(current_user.uniqueID + f.filename).hexdigest().upper() + '.{}'.format(f.filename.split('.')[1])
             f.filename = md5_name
             try:
                 path = files.save(f, folder=current_user.username, name=real_name)
-                new_file = UploadFile(path=path,
-                                      name=real_name,
-                                      size='',
-                                      user=current_user,
-                                      md5_name=md5_name)
-                db.session.add(new_file)
+                f_stat = os.stat(os.path.join(current_app.config['UPLOADED_FILES_DEST'], path))
+                if UploadFile.has_file(md5_name):
+                    flash('文件{}已经存在'.format(real_name), category='warning')
+                else:
+                    new_file = UploadFile(path=path,
+                                          name=real_name,
+                                          size=f_stat.st_size,
+                                          user=current_user,
+                                          md5_name=md5_name)
+                    db.session.add(new_file)
             except:
                 db.session.rollback()
                 flash('文件{}上传失败'.format(real_name), category='error')
@@ -132,4 +137,13 @@ def download(file_id):
     f = UploadFile.query.get(file_id)
     if f and os.path.isfile(os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)):
         return send_from_directory(current_app.config['UPLOADED_FILES_DEST'], f.path, as_attachment=True)
+    abort(404)
+
+
+@auth.route('/show/<file_id>/')
+@login_required
+def show(file_id):
+    f = UploadFile.query.get(file_id)
+    if f and os.path.isfile(os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)):
+        return send_from_directory(current_app.config['UPLOADED_FILES_DEST'], f.path)
     abort(404)

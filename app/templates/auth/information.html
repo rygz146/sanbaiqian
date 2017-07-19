@@ -59,7 +59,7 @@
                 <td>{{ f.path }}</td>
                 <td>{{ f.size }}</td>
                 <td>{{ f.create_time }}</td>
-                <td><a href="{{ url_for('auth.download', file_id=f.id) }}">下载</a> | <a href="">删除</a></td>
+                <td><a href="{{ url_for('auth.show', file_id=f.id) }}" target="_blank">预览</a> | <a href="{{ url_for('auth.download', file_id=f.id) }}">下载</a> | <a href="">删除</a></td>
             </tr>
         {% endfor %}
         </tbody>

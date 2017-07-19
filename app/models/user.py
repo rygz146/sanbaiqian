@@ -125,10 +125,14 @@ class UploadFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     path = db.Column(db.String(256), nullable=False)
     name = db.Column(db.String(256), nullable=False)
-    size = db.Column(db.String(128), nullable=False)
+    size = db.Column(db.Integer)
     md5_name = db.Column(db.String(32), nullable=False)
     create_time = db.Column(db.DateTime(), default=db.func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('edu_user.id'))
+
+    @classmethod
+    def has_file(cls, md5_name):
+        return cls.query.filter_by(md5_name=md5_name).first()
 
     def __init__(self, **kwargs):
         super(UploadFile, self).__init__(**kwargs)
