@@ -8,10 +8,5 @@ from wtforms.validators import DataRequired
 
 
 class UploadForm(FlaskForm):
-    files = FileField(
-        label='图片',
-        validators=[
-            DataRequired(message='请选择图片')
-        ]
-    )
+    files = FileField(label='图片', validators=[DataRequired(message='请选择图片')])
     submit = SubmitField(label='上传')

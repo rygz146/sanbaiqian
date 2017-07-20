@@ -4,12 +4,9 @@
 # @Author : trl
 from flask import Blueprint
 
-root = Blueprint(
-    'root',
-    __name__,
-    url_prefix='/root'
-)
 
-from . import (
-    views,
-)
+root = Blueprint('root',
+                 __name__,
+                 url_prefix='/root')
+
+from . import (views,)

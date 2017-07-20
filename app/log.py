@@ -41,7 +41,10 @@ class Logger(object):
             self._logger = logging.getLogger(log_name)
             # handler = logging.FileHandler(filename=log_file)
             # 配置一个根据日期处理日志的handler，每天产生一个日志，可以保留10个
-            handler = TimedRotatingFileHandler(filename=log_file, when='D', encoding='utf-8', interval=1,
+            handler = TimedRotatingFileHandler(filename=log_file,
+                                               when='D',
+                                               encoding='utf-8',
+                                               interval=1,
                                                backupCount=10)
             formatter = logging.Formatter(_format)
             handler.setFormatter(formatter)

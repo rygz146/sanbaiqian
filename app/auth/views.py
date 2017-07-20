@@ -11,8 +11,7 @@ from flask_principal import identity_changed, Identity, AnonymousIdentity
 from ..forms.user import LoginForm, RegisterForm
 from ..forms.upload import UploadForm
 from app.log import Logger
-from ..upload import files
-from hashlib import md5
+from ..upload import files, md5_filename
 import os
 
 auth_log = Logger('auth_log', 'auth.log', True)
@@ -24,11 +23,9 @@ def index():
     pagination = User.query.paginate(page=page, per_page=10, error_out=False)
     users = pagination.items
 
-    return render_template(
-        'auth/index.html',
-        pagination=pagination,
-        users=users
-    )
+    return render_template('auth/index.html',
+                           pagination=pagination,
+                           users=users)
 
 
 @auth.route('/register/', methods=['GET', 'POST'])
@@ -45,10 +42,8 @@ def register():
         else:
             flash(message='用户名已被占用', category='warning')
 
-    return render_template(
-        'auth/register.html',
-        form=form
-    )
+    return render_template('auth/register.html',
+                           form=form)
 
 
 @auth.route('/login/', methods=['GET', 'POST'])
@@ -66,10 +61,8 @@ def login():
         else:
             flash(message='用户名或密码错误', category='error')
 
-    return render_template(
-        'auth/login.html',
-        form=form
-    )
+    return render_template('auth/login.html',
+                           form=form)
 
 
 @auth.route('/logout/')
@@ -92,12 +85,10 @@ def information():
     pagination = UploadFile.query.filter_by(user=current_user).paginate(page=page, per_page=5, error_out=False)
     upload_files = pagination.items
 
-    return render_template(
-        'auth/information.html',
-        form=form,
-        files=upload_files,
-        pagination=pagination
-    )
+    return render_template('auth/information.html',
+                           form=form,
+                           files=upload_files,
+                           pagination=pagination)
 
 
 @auth.route('/upload/', methods=['GET', 'POST'])
@@ -108,19 +99,18 @@ def upload():
         upload_files = form.files.raw_data
         for f in upload_files:
             real_name = f.filename
-            md5_name = md5(current_user.uniqueID + f.filename).hexdigest().upper() + '.{}'.format(f.filename.split('.')[1])
-            f.filename = md5_name
+            f.filename = md5_filename(current_user, real_name)
             try:
-                path = files.save(f, folder=current_user.username, name=real_name)
-                f_stat = os.stat(os.path.join(current_app.config['UPLOADED_FILES_DEST'], path))
-                if UploadFile.has_file(md5_name):
+                if UploadFile.has_file(f.filename):
                     flash('文件{}已经存在'.format(real_name), category='warning')
                 else:
+                    path = files.save(f, folder=current_user.username, name=real_name)
+                    f_stat = os.stat(os.path.join(current_app.config['UPLOADED_FILES_DEST'], path))
                     new_file = UploadFile(path=path,
                                           name=real_name,
                                           size=f_stat.st_size,
                                           user=current_user,
-                                          md5_name=md5_name)
+                                          md5_name=f.filename)
                     db.session.add(new_file)
             except:
                 db.session.rollback()

@@ -26,9 +26,9 @@ def init_test_db():
     db.drop_all()
     db.create_all()
     user.Role.insert_role()
-    user.User.generate_fake()
     school.City.generate_fake()
     school.School.generate_fake()
+    user.User.generate_fake()
 
 if __name__ == '__main__':
     manager.run()

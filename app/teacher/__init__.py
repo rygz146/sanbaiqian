@@ -4,12 +4,9 @@
 # @Author : trl
 from flask import Blueprint
 
-teacher = Blueprint(
-    'teacher',
-    __name__,
-    url_prefix='/teacher'
-)
 
-from . import (
-    views,
-)
+teacher = Blueprint('teacher',
+                    __name__,
+                    url_prefix='/teacher')
+
+from . import (views,)

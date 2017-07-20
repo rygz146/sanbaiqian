@@ -7,6 +7,4 @@ from flask_wtf import CSRFProtect
 
 csrf = CSRFProtect()
 
-from . import (
-    user,
-)
+from . import (user,)

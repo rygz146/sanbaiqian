@@ -6,13 +6,14 @@ from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import BadSignature, BadTimeSignature
 from flask import current_app
 from flask_principal import Permission, RoleNeed
 from sqlalchemy.exc import IntegrityError
 from random import seed, choice
 import forgery_py
 import uuid
-
+from school import School, teacher_to_class
 
 ROLES = ['root', 'admin', 'teacher', 'parent']
 
@@ -23,7 +24,7 @@ parent_permission = Permission(RoleNeed('parent'))
 
 
 class Role(db.Model):
-    __tablename__ = 'edu_role'
+    __tablename__ = 'role'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True)
@@ -42,15 +43,15 @@ class Role(db.Model):
         return "<Role id: {}>".format(self.id)
 
 
-user_role = db.Table(
-    'edu_user_role',
-    db.Column('user_id', db.Integer, db.ForeignKey('edu_user.id')),
-    db.Column('role_id', db.Integer, db.ForeignKey('edu_role.id'))
+user_to_role = db.Table(
+    'user_to_role',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
 )
 
 
 class User(db.Model, UserMixin):
-    __tablename__ = 'edu_user'
+    __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
@@ -59,13 +60,21 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(20), unique=True)
     create_time = db.Column(db.DateTime(), default=db.func.now())
     uniqueID = db.Column(db.String(32), unique=True)
-    files = db.relationship('UploadFile', backref='user', lazy='dynamic')
-    roles = db.relationship(
-        'Role',
-        secondary=user_role,
-        backref=db.backref('users', lazy='dynamic'),
-        lazy='dynamic'
-    )
+    school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
+    files = db.relationship('UploadFile',
+                            backref='user',
+                            lazy='dynamic')
+    roles = db.relationship('Role',
+                            secondary=user_to_role,
+                            backref=db.backref('users', lazy='dynamic'),
+                            lazy='dynamic')
+    teacher_classes = db.relationship('SchoolClass',
+                                      secondary=teacher_to_class,
+                                      backref=db.backref('teachers', lazy='dynamic'),
+                                      lazy='dynamic')
+    children = db.relationship('Child',
+                               backref='parent',
+                               lazy='dynamic')
 
     @property
     def password(self):
@@ -90,19 +99,22 @@ class User(db.Model, UserMixin):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-        except:
+        except (BadSignature, BadTimeSignature):
             return None
         else:
             return User.query.get(data['id'])
 
     @staticmethod
-    def generate_fake(count=100):
+    def generate_fake(count=10):
         seed()
         for i in range(count):
             r = Role.query.get(choice([1, 2, 3, 4]))
+            s = School.query.get(choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
             u = User(username=forgery_py.internet.user_name(True),
                      password='123456',
                      gender=choice([True, False]),
+                     create_time=forgery_py.date.date(past=True),
+                     school=s,
                      phone=forgery_py.address.phone())
             u.roles.append(r)
             db.session.add(u)
@@ -120,7 +132,7 @@ class User(db.Model, UserMixin):
 
 
 class UploadFile(db.Model):
-    __tablename__ = 'edu_upload_file'
+    __tablename__ = 'upload_file'
 
     id = db.Column(db.Integer, primary_key=True)
     path = db.Column(db.String(256), nullable=False)
@@ -128,7 +140,7 @@ class UploadFile(db.Model):
     size = db.Column(db.Integer)
     md5_name = db.Column(db.String(32), nullable=False)
     create_time = db.Column(db.DateTime(), default=db.func.now())
-    user_id = db.Column(db.Integer, db.ForeignKey('edu_user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     @classmethod
     def has_file(cls, md5_name):

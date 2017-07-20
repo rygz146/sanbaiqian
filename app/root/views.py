@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/18
 # @Author : trl
-from . import root
-from ..models.user import root_permission
-from ..log import Logger
-from flask import abort
+from app.root import root
+from app.models.user import root_permission
+from app.log import Logger
+from flask import abort, render_template
 
 root_log = Logger('root_log', 'root.log', True)
 
@@ -18,4 +18,5 @@ def root_before_request():
 
 @root.route('/')
 def index():
-    return 'root'
+
+    return render_template('root/index.html')

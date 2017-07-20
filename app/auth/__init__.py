@@ -4,14 +4,10 @@
 # @Author : trl
 from flask import Blueprint
 
-auth = Blueprint(
-    'auth',
-    __name__,
-    url_prefix='/auth',
-    static_folder='static'
-)
+auth = Blueprint('auth',
+                 __name__,
+                 url_prefix='/auth',
+                 static_folder='static')
 
-from . import (
-    views,
-    errors
-)
+from . import (views,
+               errors)

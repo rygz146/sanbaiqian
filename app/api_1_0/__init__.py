@@ -4,14 +4,11 @@
 # @Author : trl
 from flask import Blueprint
 
-api = Blueprint(
-    'api',
-    __name__,
-    url_prefix='/api'
-)
+api = Blueprint('api',
+                __name__,
+                url_prefix='/api')
 
-from . import (
-    views,
-    tools,
-    errors
-)
+from . import (views,
+               tools,
+               errors)
+

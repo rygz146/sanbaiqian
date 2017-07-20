@@ -51,6 +51,4 @@ def index():
     # service_user = get_instance(service_users)
     # users = service_user.query_users(limit=10)
 
-    return render_template(
-        'main/index.html'
-    )
+    return render_template('main/index.html')

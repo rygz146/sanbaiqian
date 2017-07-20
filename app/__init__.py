@@ -10,7 +10,10 @@ from flask_principal import Principal, identity_loaded, UserNeed, RoleNeed
 from .forms import csrf
 from flask_uploads import configure_uploads, patch_request_class
 from .upload import files
+import sys
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'

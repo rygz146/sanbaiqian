@@ -4,6 +4,8 @@
 # @Author : trl
 import os
 from flask_uploads import DEFAULTS, AUDIO, ARCHIVES, EXECUTABLES
+
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 VIDEO = tuple('mp4 avi rm rmvb'.split())
 
