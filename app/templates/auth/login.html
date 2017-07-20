@@ -14,6 +14,7 @@
 
     <form action="{{ url_for('auth.login') }}" method="post">
         {{ form.hidden_tag() }}
+        <input type="hidden" value="{{ next or '' }}" name="next">
         {{ form.username.label }} {{ form.username(required='required') }}
         {% for error in form.username.errors %}
             <strong style="color: red">{{ error }}</strong><br>
@@ -23,7 +24,7 @@
             <strong style="color: red">{{ error }}</strong><br>
         {% endfor %}
         {{ form.submit }}
-        <a href="{{ url_for('auth.index') }}"><button type="button">返回</button></a>
+        <a href="{{ url_for('main.index') }}"><button type="button">返回</button></a>
     </form>
 
 {% endblock %}

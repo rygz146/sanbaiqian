@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from random import seed, choice
 import forgery_py
 import uuid
-from school import School, teacher_to_class
+from school import School, teacher_to_class, teacher_to_lesson
 
 ROLES = ['root', 'admin', 'teacher', 'parent']
 
@@ -75,6 +75,10 @@ class User(db.Model, UserMixin):
     children = db.relationship('Child',
                                backref='parent',
                                lazy='dynamic')
+    teacher_lessons = db.relationship('ClassLesson',
+                                      secondary=teacher_to_lesson,
+                                      backref=db.backref('teachers', lazy='dynamic'),
+                                      lazy='dynamic')
 
     @property
     def password(self):

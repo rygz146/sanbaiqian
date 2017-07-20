@@ -13,31 +13,54 @@ from ..forms.upload import UploadForm
 from app.log import Logger
 from ..upload import files, md5_filename
 import os
+from urlparse import urlparse, urljoin
+
 
 auth_log = Logger('auth_log', 'auth.log', True)
+
+# 以下三个方法参考，主要处理登录重定向
+# http://flask.pocoo.org/snippets/62/
+
+
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+        ref_url.netloc == test_url.netloc
+
+
+def get_redirect_target():
+    for target in request.values.get('next'), request.referrer:
+        if not target:
+            continue
+        if is_safe_url(target):
+            return target
+
+
+def redirect_back(endpoint, **values):
+    target = request.form.get('next')
+    if not target or not is_safe_url(target):
+        target = url_for(endpoint, **values)
+    return redirect(target)
 
 
 @auth.route('/')
 def index():
-    page = request.args.get('page', 1, int)
-    pagination = User.query.paginate(page=page, per_page=10, error_out=False)
-    users = pagination.items
 
-    return render_template('auth/index.html',
-                           pagination=pagination,
-                           users=users)
+    return render_template('auth/index.html')
 
 
-@auth.route('/register/', methods=['GET', 'POST'])
+@auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
         u = User.query.filter_by(username=form.username.data).first()
         if u is None:
-            new_user = User(username=form.username,
-                            password=form.password)
+            new_user = User(username=form.username.data,
+                            password=form.password.data)
             db.session.add(new_user)
             db.session.commit()
+            flash(message='注册成功，请登录完善信息', category='success')
             return redirect(url_for('auth.login'))
         else:
             flash(message='用户名已被占用', category='warning')
@@ -46,9 +69,10 @@ def register():
                            form=form)
 
 
-@auth.route('/login/', methods=['GET', 'POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    next_url = get_redirect_target()
     if form.validate_on_submit():
         u = User.query.filter_by(username=form.username.data).first()
         if u and u.verify_password(form.password.data):
@@ -57,15 +81,16 @@ def login():
                 current_app._get_current_object(),
                 identity=Identity(u.id)
             )
-            return redirect(request.args.get('next') or url_for('auth.index'))
+            return redirect_back('auth.index')
         else:
             flash(message='用户名或密码错误', category='error')
 
     return render_template('auth/login.html',
+                           next=next_url,
                            form=form)
 
 
-@auth.route('/logout/')
+@auth.route('/logout')
 @login_required
 def logout():
     logout_user()
@@ -91,7 +116,7 @@ def information():
                            pagination=pagination)
 
 
-@auth.route('/upload/', methods=['GET', 'POST'])
+@auth.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
     form = UploadForm()

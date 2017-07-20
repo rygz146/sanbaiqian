@@ -109,6 +109,7 @@ class SchoolClass(db.Model):
     school_grade_id = db.Column(db.Integer, db.ForeignKey('school_grade.id'))
     create_time = db.Column(db.DateTime(), default=db.func.now())
     students = db.relationship('Child', backref='school_class', lazy='dynamic')
+    class_schedules = db.relationship('ClassSchedule', backref='school_class', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(SchoolClass, self).__init__(**kwargs)
@@ -139,7 +140,10 @@ class ClassSchedule(db.Model):
     __tablename__ = 'class_schedule'
 
     id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(db.Date(), index=True)
+    weekday = db.Column(db.Integer)
     school_class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'))
+    class_lessons = db.relationship('ClassLesson', backref='class_schedule', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(ClassSchedule, self).__init__(**kwargs)
@@ -148,11 +152,31 @@ class ClassSchedule(db.Model):
         return '<ClassScheduler id: {}>'.format(self.id)
 
 
+teacher_to_lesson = db.Table(
+    'teacher_to_lesson',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('class_lesson_id', db.Integer, db.ForeignKey('class_lesson.id'))
+)
+
+
+lesson_to_file = db.Table(
+    'lesson_to_file',
+    db.Column('upload_file_id', db.Integer, db.ForeignKey('upload_file.id')),
+    db.Column('class_lesson_id', db.Integer, db.ForeignKey('class_lesson.id'))
+)
+
+
 class ClassLesson(db.Model):
-    __tablename__ = 'ClassLesson'
+    __tablename__ = 'class_lesson'
 
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(512))
+    content = db.Column(db.Text)
     class_schedule_id = db.Column(db.Integer, db.ForeignKey('class_schedule.id'))
+    lesson_files = db.relationship('UploadFile',
+                                   secondary=lesson_to_file,
+                                   backref=db.backref('teachers', lazy='dynamic'),
+                                   lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(ClassLesson, self).__init__(**kwargs)
