@@ -52,9 +52,8 @@ class School(db.Model):
     address = db.Column(db.String(256))
     create_time = db.Column(db.DateTime(), default=db.func.now())
     city_id = db.Column(db.Integer, db.ForeignKey('city_code.id'))
-    users = db.relationship('User', backref='school', lazy='dynamic')
-    school_grades = db.relationship('SchoolGrade', backref='school', lazy='dynamic')
-    school_classes = db.relationship('SchoolClass', backref='school', lazy='dynamic')
+    grades = db.relationship('SchoolGrade', backref='school', lazy='dynamic')
+    classes = db.relationship('SchoolClass', backref='school', lazy='dynamic')
 
     @staticmethod
     def generate_fake(count=10):
@@ -84,7 +83,7 @@ class SchoolGrade(db.Model):
     name = db.Column(db.String(256), nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     create_time = db.Column(db.DateTime(), default=db.func.now())
-    school_classes = db.relationship('SchoolClass', backref='school_grade', lazy='dynamic')
+    classes = db.relationship('SchoolClass', backref='school_grade', lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(SchoolGrade, self).__init__(**kwargs)
@@ -93,10 +92,10 @@ class SchoolGrade(db.Model):
         return '<SchoolGrade id: {}>'.format(self.id)
 
 
-teacher_to_class = db.Table(
-    'teacher_to_class',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('school_class', db.Integer, db.ForeignKey('school_class.id'))
+classes_to_teachers = db.Table(
+    'classes_to_teachers',
+    db.Column('school_class_id', db.Integer, db.ForeignKey('school_class.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
 )
 
 
@@ -108,8 +107,12 @@ class SchoolClass(db.Model):
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     school_grade_id = db.Column(db.Integer, db.ForeignKey('school_grade.id'))
     create_time = db.Column(db.DateTime(), default=db.func.now())
-    students = db.relationship('Child', backref='school_class', lazy='dynamic')
-    class_schedules = db.relationship('ClassSchedule', backref='school_class', lazy='dynamic')
+    students = db.relationship('Child', backref='class', lazy='dynamic')
+    schedule = db.relationship('ClassSchedule', backref='class', lazy='dynamic')
+    teachers = db.relationship('SchoolClass',
+                               secondary=classes_to_teachers,
+                               backref=db.backref('classes', lazy='dynamic'),
+                               lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(SchoolClass, self).__init__(**kwargs)
@@ -118,32 +121,24 @@ class SchoolClass(db.Model):
         return '<SchoolClass id: {}>'.format(self.id)
 
 
-class Child(db.Model):
-    __tablename__ = 'child'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256), nullable=False)
-    age = db.Column(db.Integer)
-    gender = db.Column(db.Boolean)
-    school_class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'))
-    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    create_time = db.Column(db.DateTime(), default=db.func.now())
-
-    def __init__(self, **kwargs):
-        super(Child, self).__init__(**kwargs)
-
-    def __repr__(self):
-        return '<Child id: {}>'.format(self.id)
+schedules_to_lessons = db.Table(
+    'schedules_to_lessons',
+    db.Column('class_schedule_id', db.Integer, db.ForeignKey('class_schedule.id')),
+    db.Column('class_lesson_id', db.Integer, db.ForeignKey('class_lesson.id'))
+)
 
 
 class ClassSchedule(db.Model):
     __tablename__ = 'class_schedule'
 
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.Date(), index=True)
-    weekday = db.Column(db.Integer)
     school_class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'))
-    class_lessons = db.relationship('ClassLesson', backref='class_schedule', lazy='dynamic')
+    schedule_type = db.Column(db.Boolean, default=False)  # False(固定,整个学期都执行)，True(动态添加课程)
+    term = db.Column(db.Boolean)  # True(上学期) False(下学期)
+    lessons = db.relationship('ClassLesson',
+                              secondary=schedules_to_lessons,
+                              backref=db.backref('schedules', lazy='dynamic'),
+                              lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(ClassSchedule, self).__init__(**kwargs)
@@ -152,17 +147,10 @@ class ClassSchedule(db.Model):
         return '<ClassScheduler id: {}>'.format(self.id)
 
 
-teacher_to_lesson = db.Table(
-    'teacher_to_lesson',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('class_lesson_id', db.Integer, db.ForeignKey('class_lesson.id'))
-)
-
-
-lesson_to_file = db.Table(
-    'lesson_to_file',
-    db.Column('upload_file_id', db.Integer, db.ForeignKey('upload_file.id')),
-    db.Column('class_lesson_id', db.Integer, db.ForeignKey('class_lesson.id'))
+lessons_to_teachers = db.Table(
+    'lessons_to_teachers',
+    db.Column('class_lesson_id', db.Integer, db.ForeignKey('class_lesson.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
 )
 
 
@@ -170,16 +158,46 @@ class ClassLesson(db.Model):
     __tablename__ = 'class_lesson'
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(512))
-    content = db.Column(db.Text)
-    class_schedule_id = db.Column(db.Integer, db.ForeignKey('class_schedule.id'))
-    lesson_files = db.relationship('UploadFile',
-                                   secondary=lesson_to_file,
-                                   backref=db.backref('teachers', lazy='dynamic'),
-                                   lazy='dynamic')
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id'))
+    date = db.Column(db.Date(), index=True)
+    start_time = db.Column(db.Time())
+    end_time = db.Column(db.Time())
+    weekday = db.Column(db.Integer)
+    teachers = db.relationship('User',
+                               secondary=lessons_to_teachers,
+                               backref=db.backref('lessons', lazy='dynamic'),
+                               lazy='dynamic')
 
     def __init__(self, **kwargs):
         super(ClassLesson, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return '<ClassLesson id: {}>'.format(self.id)
+
+
+lessons_to_files = db.Table(
+    'lessons_to_files',
+    db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id')),
+    db.Column('upload_file_id', db.Integer, db.ForeignKey('upload_file.id'))
+)
+
+
+class Lesson(db.Model):
+    __tablename__ = 'lesson'
+
+    id = db.Column(db.Integer, primary_key=True)
+    create_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    title = db.Column(db.String(512))
+    content = db.Column(db.Text)
+    create_time = db.Column(db.DateTime(), default=db.func.now())
+    files = db.relationship('UploadFile',
+                            secondary=lessons_to_files,
+                            backref=db.backref('lessons', lazy='dynamic'),
+                            lazy='dynamic')
+    class_lessons = db.relationship('ClassLesson', backref='lesson', lazy='dynamic')
+
+    def __init__(self, **kwargs):
+        super(Lesson, self).__init__(**kwargs)
 
     def __repr__(self):
         return '<ClassLesson id: {}>'.format(self.id)

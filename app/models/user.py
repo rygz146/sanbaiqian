@@ -13,7 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from random import seed, choice
 import forgery_py
 import uuid
-from school import School, teacher_to_class, teacher_to_lesson
+from school import School
 
 ROLES = ['root', 'admin', 'teacher', 'parent']
 
@@ -43,10 +43,17 @@ class Role(db.Model):
         return "<Role id: {}>".format(self.id)
 
 
-user_to_role = db.Table(
-    'user_to_role',
+users_to_roles = db.Table(
+    'users_to_roles',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+)
+
+
+users_schools = db.Table(
+    'users_to_schools',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('school_id', db.Integer, db.ForeignKey('school.id'))
 )
 
 
@@ -60,25 +67,16 @@ class User(db.Model, UserMixin):
     phone = db.Column(db.String(20), unique=True)
     create_time = db.Column(db.DateTime(), default=db.func.now())
     uniqueID = db.Column(db.String(32), unique=True)
-    school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
-    files = db.relationship('UploadFile',
-                            backref='user',
-                            lazy='dynamic')
     roles = db.relationship('Role',
-                            secondary=user_to_role,
+                            secondary=users_to_roles,
                             backref=db.backref('users', lazy='dynamic'),
                             lazy='dynamic')
-    teacher_classes = db.relationship('SchoolClass',
-                                      secondary=teacher_to_class,
-                                      backref=db.backref('teachers', lazy='dynamic'),
-                                      lazy='dynamic')
-    children = db.relationship('Child',
-                               backref='parent',
-                               lazy='dynamic')
-    teacher_lessons = db.relationship('ClassLesson',
-                                      secondary=teacher_to_lesson,
-                                      backref=db.backref('teachers', lazy='dynamic'),
-                                      lazy='dynamic')
+    schools = db.relationship('School',
+                              secondary=users_schools,
+                              backref=db.backref('users', lazy='dynamic'),
+                              lazy='dynamic')
+    files = db.relationship('UploadFile', backref='user', lazy='dynamic')
+    children = db.relationship('Child', backref='parent', lazy='dynamic')
 
     @property
     def password(self):
@@ -118,8 +116,8 @@ class User(db.Model, UserMixin):
                      password='123456',
                      gender=choice([True, False]),
                      create_time=forgery_py.date.date(past=True),
-                     school=s,
                      phone=forgery_py.address.phone())
+            u.schools.append(s)
             u.roles.append(r)
             db.session.add(u)
             try:
@@ -155,3 +153,22 @@ class UploadFile(db.Model):
 
     def __repr__(self):
         return '<UploadFile id: {}>'.format(self.id)
+
+
+class Child(db.Model):
+    __tablename__ = 'child'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), nullable=False)
+    age = db.Column(db.Integer)
+    gender = db.Column(db.Boolean)
+    school_class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'))
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    birthday = db.Column(db.Date())
+    create_time = db.Column(db.DateTime(), default=db.func.now())
+
+    def __init__(self, **kwargs):
+        super(Child, self).__init__(**kwargs)
+
+    def __repr__(self):
+        return '<Child id: {}>'.format(self.id)
