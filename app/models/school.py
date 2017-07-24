@@ -12,25 +12,24 @@ class City(db.Model):
     """
     省市（区）县邮政编码
     """
-    __tablename__ = 'city_code'
+    __tablename__ = 'city'
 
     id = db.Column(db.Integer, primary_key=True)
-    province = db.Column(db.String(128), nullable=False)
-    province_code = db.Column(db.Integer, nullable=False, index=True)
-    city = db.Column(db.String(128), nullable=False)
-    city_code = db.Column(db.Integer, unique=True)
+    province = db.Column(db.String(128), nullable=False, index=True)
+    province_code = db.Column(db.Integer, index=True)
     district = db.Column(db.String(128), nullable=False)
+    county = db.Column(db.String(128), nullable=False)
+    zip_code = db.Column(db.Integer, unique=True, index=True)
     schools = db.relationship('School', backref='city', lazy='dynamic')
 
     @staticmethod
     def generate_fake(count=10):
         seed()
         for i in range(count):
-            c = City(province=forgery_py.address.country(),
-                     province_code=forgery_py.address.zip_code(),
-                     city=forgery_py.address.city(),
-                     city_code=forgery_py.address.zip_code(),
-                     district=forgery_py.address.street_name())
+            c = City(province=forgery_py.address.city(),
+                     district=forgery_py.address.city(),
+                     county=forgery_py.address.street_name(),
+                     zip_code=forgery_py.address.zip_code())
             db.session.add(c)
             try:
                 db.session.commit()
@@ -51,7 +50,7 @@ class School(db.Model):
     name = db.Column(db.String(256), nullable=False)
     address = db.Column(db.String(256))
     create_time = db.Column(db.DateTime(), default=db.func.now())
-    city_id = db.Column(db.Integer, db.ForeignKey('city_code.id'))
+    city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
     grades = db.relationship('SchoolGrade', backref='school', lazy='dynamic')
     classes = db.relationship('SchoolClass', backref='school', lazy='dynamic')
 

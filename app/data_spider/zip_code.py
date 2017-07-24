@@ -50,11 +50,9 @@ def yield_data1():
                     b = url[0] + ' ' + tds[3].get_text() + ' ' + tds[3].get_text() + ' ' + tds[4].get_text()
                     with open('{}.txt'.format(datetime.now().date()), 'a+') as f:
                         f.write(unicode.encode(a, 'utf-8')+'\n')
-                        if tds[3].get_text() == '' or tds[4].get_text() == '':
-                            f.write(unicode.encode(b, 'utf-8') + '\n')
+                        f.write(unicode.encode(b, 'utf-8') + '\n')
                     print url[0], tds[0].get_text(), tds[0].get_text(), tds[1].get_text()
-                    if tds[4].get_text() == '' or tds[3].get_text() == '':
-                        print url[0], tds[3].get_text(), tds[3].get_text(), tds[4].get_text()
+                    print url[0], tds[3].get_text(), tds[3].get_text(), tds[4].get_text()
                 except IndexError:
                     pass
 
@@ -72,11 +70,9 @@ def yield_data2():
                 b = province + ' ' + city + ' ' + tds[3].get_text() + ' ' + tds[4].get_text()
                 with open('{}.txt'.format(datetime.now().date()), 'a+') as f:
                     f.write(unicode.encode(a, 'utf-8') + '\n')
-                    if tds[3].get_text() == '' or tds[4].get_text() == '':
-                        f.write(unicode.encode(b, 'utf-8') + '\n')
+                    f.write(unicode.encode(b, 'utf-8') + '\n')
                 print province, city, tds[0].get_text(), tds[1].get_text()
-                if tds[3].get_text() == '' or tds[4].get_text() == '':
-                    print province, city, tds[3].get_text(), tds[4].get_text()
+                print province, city, tds[3].get_text(), tds[4].get_text()
             except IndexError:
                 pass
 
