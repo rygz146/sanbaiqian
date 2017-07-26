@@ -27,6 +27,7 @@ class City(db.Model):
         seed()
         for i in range(count):
             c = City(province=forgery_py.address.city(),
+                     province_code=forgery_py.address.zip_code(),
                      district=forgery_py.address.city(),
                      county=forgery_py.address.street_name(),
                      zip_code=forgery_py.address.zip_code())
