@@ -1,4 +1,4 @@
-{% extends '__include/base.html' %}
+{% extends 'include/base.html' %}
 
 {% block content %}
 
@@ -13,21 +13,27 @@
     {% endwith %}
 
     <form action="{{ url_for('auth.register') }}" method="post">
+
         {{ form.hidden_tag() }}
+
         {{ form.username.label }} {{ form.username(required='required') }}
         {% for error in form.username.errors %}
             <strong style="color: red">{{ error }}</strong><br>
         {% endfor %}
+
         {{ form.password.label }} {{ form.password(required='required') }}
         {% for error in form.password.errors %}
             <strong style="color: red">{{ error }}</strong><br>
         {% endfor %}
+
         {{ form.re_password.label }} {{ form.re_password(required='required') }}
         {% for error in form.re_password.errors %}
             <strong style="color: red">{{ error }}</strong><br>
         {% endfor %}
+
         {{ form.submit }}
-        <a href="{{ url_for('main.index') }}"><button type="button">返回</button></a>
+        <a href="{{ url_for('main.index') }}" class="pull-right"><button type="button">返回</button></a>
+
     </form>
 
 {% endblock %}

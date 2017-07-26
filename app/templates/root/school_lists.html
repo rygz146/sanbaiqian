@@ -1,0 +1,43 @@
+{% extends 'include/base.html' %}
+
+{% from 'macro/pagination.html' import render_pagination%}
+
+{% block nav %}
+    {% include 'include/nav.html' %}
+{% endblock %}
+
+
+{% block content %}
+    {% include 'root/nav.html' %}
+    <table class="table">
+        <thead>
+        <tr>
+            <td></td>
+            <td>名字</td>
+            <td>省份</td>
+            <td>市（区）</td>
+            <td>县</td>
+            <td>邮编</td>
+            <td>创建时间</td>
+        </tr>
+        </thead>
+        <tbody>
+            {% for school in schools | sort(attribute='create_time') %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ school.name }}</td>
+                    <td>{{ school.city.province }}</td>
+                    <td>{{ school.city.district }}</td>
+                    <td>{{ school.city.county }}</td>
+                    <td>{{ school.city.zip_code }}</td>
+                    <td>{{ school.create_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pagination %}
+        {{ render_pagination(pagination, 'root.school_lists') }}
+    {% endif %}
+
+{% endblock %}

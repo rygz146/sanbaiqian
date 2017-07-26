@@ -3,7 +3,7 @@
 # @Date   : 2017/7/12
 # @Author : trl
 from . import auth
-from ..models.user import db, User, UploadFile
+from ..models.user import db, User, UploadFile, Role
 from flask_login import login_user, logout_user, login_required, current_user
 from flask import render_template, current_app, redirect, request, url_for, \
     flash, abort, send_from_directory
@@ -13,41 +13,21 @@ from ..forms.upload import UploadForm
 from app.log import Logger
 from ..upload import files, md5_filename
 import os
-from urlparse import urlparse, urljoin
 
 
 auth_log = Logger('auth_log', 'auth.log', True)
 
-# 以下三个方法参考，主要处理登录重定向
-# http://flask.pocoo.org/snippets/62/
-
-
-def is_safe_url(target):
-    ref_url = urlparse(request.host_url)
-    test_url = urlparse(urljoin(request.host_url, target))
-    return test_url.scheme in ('http', 'https') and \
-        ref_url.netloc == test_url.netloc
-
-
-def get_redirect_target():
-    for target in request.values.get('next'), request.referrer:
-        if not target:
-            continue
-        if is_safe_url(target):
-            return target
-
-
-def redirect_back(endpoint, **values):
-    target = request.form.get('next')
-    if not target or not is_safe_url(target):
-        target = url_for(endpoint, **values)
-    return redirect(target)
-
 
 @auth.route('/')
+@login_required
 def index():
+    roles_table = {'teacher': 'teacher', 'parent': 'parent'}
+    for role in current_user.roles:
+        roles_table.pop(role.name, '')
 
-    return render_template('auth/index.html')
+    return render_template('auth/index.html',
+                           title='用户系统',
+                           roles_table=roles_table)
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -60,19 +40,41 @@ def register():
                             password=form.password.data)
             db.session.add(new_user)
             db.session.commit()
-            flash(message='注册成功，请登录完善信息', category='success')
-            return redirect(url_for('auth.login'))
+            login_user(user=new_user)
+            identity_changed.send(
+                current_app._get_current_object(),
+                identity=Identity(new_user.id)
+            )
+            return redirect(url_for('auth.index'))
         else:
             flash(message='用户名已被占用', category='warning')
 
     return render_template('auth/register.html',
+                           title='注册',
                            form=form)
+
+
+@auth.route('/apply/<role_name>', methods=['GET', 'POST'])
+@login_required
+def apply_role(role_name):
+    roles_table = ['teacher', 'parent']
+    user_roles = [r.name for r in current_user.roles]
+    if role_name in roles_table:
+        if role_name in user_roles:
+            flash(message='您已经拥有该角色，不能重复申请', category='error')
+        else:
+            current_user.roles.append(Role.query.filter_by(name=role_name).first())
+            db.session.add(current_user)
+            db.session.commit()
+    else:
+        flash(message='该角色不在您的可申请范围，请联系管理员', category='error')
+
+    return redirect(url_for('auth.index'))
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
-    next_url = get_redirect_target()
     if form.validate_on_submit():
         u = User.query.filter_by(username=form.username.data).first()
         if u and u.verify_password(form.password.data):
@@ -81,12 +83,12 @@ def login():
                 current_app._get_current_object(),
                 identity=Identity(u.id)
             )
-            return redirect_back('auth.index')
+            return form.redirect('auth.index')
         else:
             flash(message='用户名或密码错误', category='error')
 
     return render_template('auth/login.html',
-                           next=next_url,
+                           title='登录',
                            form=form)
 
 
@@ -99,37 +101,38 @@ def logout():
         identity=AnonymousIdentity()
     )
 
-    return redirect(url_for('.login'))
+    return redirect(url_for('main.index'))
 
 
-@auth.route('/information/')
+@auth.route('/files/')
 @login_required
-def information():
+def file_system():
     form = UploadForm()
     page = request.args.get('page', 1, int)
     pagination = UploadFile.query.filter_by(user=current_user).paginate(page=page, per_page=5, error_out=False)
     upload_files = pagination.items
 
-    return render_template('auth/information.html',
+    return render_template('auth/file-system.html',
+                           title='文件系统',
                            form=form,
                            files=upload_files,
                            pagination=pagination)
 
 
-@auth.route('/upload', methods=['GET', 'POST'])
+@auth.route('/upload_file', methods=['GET', 'POST'])
 @login_required
-def upload():
+def upload_file():
     form = UploadForm()
     if form.validate_on_submit():
         upload_files = form.files.raw_data
         for f in upload_files:
             real_name = f.filename
             f.filename = md5_filename(current_user, real_name)
-            try:
-                if UploadFile.has_file(f.filename):
-                    flash('文件{}已经存在'.format(real_name), category='warning')
-                else:
-                    path = files.save(f, folder=current_user.username, name=real_name)
+            if UploadFile.has_file(f.filename):
+                flash('文件{}已经存在'.format(real_name), category='warning')
+            else:
+                try:
+                    path = files.save(f, folder=current_user.username)
                     f_stat = os.stat(os.path.join(current_app.config['UPLOADED_FILES_DEST'], path))
                     new_file = UploadFile(path=path,
                                           name=real_name,
@@ -137,28 +140,51 @@ def upload():
                                           user=current_user,
                                           md5_name=f.filename)
                     db.session.add(new_file)
-            except:
-                db.session.rollback()
-                flash('文件{}上传失败'.format(real_name), category='error')
-            else:
-                db.session.commit()
+                except:
+                    db.session.rollback()
+                    flash('文件{}上传失败'.format(real_name), category='error')
+                else:
+                    db.session.commit()
 
-    return redirect(url_for('.information'))
+    return redirect(url_for('auth.file_system'))
 
 
 @auth.route('/download/<file_id>/')
 @login_required
-def download(file_id):
-    f = UploadFile.query.get(file_id)
-    if f and os.path.isfile(os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)):
-        return send_from_directory(current_app.config['UPLOADED_FILES_DEST'], f.path, as_attachment=True)
-    abort(404)
+def download_file(file_id):
+    f = UploadFile.query.get_or_404(file_id)
+    if f.user == current_user:
+        if os.path.isfile(os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)):
+            return send_from_directory(current_app.config['UPLOADED_FILES_DEST'],
+                                       f.path,
+                                       attachment_filename=f.name,
+                                       as_attachment=True)
+        else:
+            db.session.delete(f)
+            db.session.commit()
+            abort(410)
+    else:
+        abort(403)
 
 
-@auth.route('/show/<file_id>/')
+@auth.route('/delete/<file_id>/')
 @login_required
-def show(file_id):
-    f = UploadFile.query.get(file_id)
-    if f and os.path.isfile(os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)):
-        return send_from_directory(current_app.config['UPLOADED_FILES_DEST'], f.path)
-    abort(404)
+def delete_file(file_id):
+    f = UploadFile.query.get_or_404(file_id)
+    file_local_path = os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)
+    if f.user == current_user:
+        if os.path.isfile(file_local_path):
+            try:
+                db.session.delete(f)
+            except:
+                db.session.rollback()
+            else:
+                db.session.commit()
+                os.remove(file_local_path)
+            return redirect(url_for('auth.file_system'))
+        else:
+            db.session.delete(f)
+            db.session.commit()
+            abort(410)
+    else:
+        abort(403)

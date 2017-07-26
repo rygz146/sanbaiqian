@@ -5,7 +5,7 @@
 from . import teacher
 from ..models.user import teacher_permission
 from ..log import Logger
-from flask import abort
+from flask import abort, render_template
 
 teacher_log = Logger('teacher_log', 'teacher.log', True)
 
@@ -18,4 +18,5 @@ def teacher_before_request():
 
 @teacher.route('/')
 def index():
-    return 'teacher'
+
+    return render_template('teacher/index.html')

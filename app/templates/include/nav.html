@@ -1,0 +1,28 @@
+<div class="nav">
+    <h5 class="nav-logo">Logo</h5>
+
+    {% if url_for('main.index') is current_link %}
+    <strong class="nav-item">首页</strong>
+    {% else %}
+    <a class="nav-item" href="{{ url_for('main.index') }}">首页</a>
+    {% endif %}
+
+    {% if current_user.is_anonymous %}
+        <a href="{{ url_for('auth.login') }}" class="nav-item">登录</a>
+        <a href="{{ url_for('auth.register') }}" class="nav-item">注册</a>
+    {% else %}
+        {% if url_for('auth.file_system') is current_link %}
+        <strong class="nav-item">文件系统</strong>
+        {% else %}
+        <a href="{{ url_for('auth.file_system') }}" class="nav-item">文件系统</a>
+        {% endif %}
+
+        {% if url_for('auth.index') is current_link %}
+        <strong class="nav-item">{{ current_user.username }}</strong>
+        {% else %}
+        <a href="{{ url_for('auth.index') }}" class="nav-item">{{ current_user.username }}</a>
+        {% endif %}
+
+        <a href="{{ url_for('auth.logout') }}" class="nav-item">退出</a>
+    {% endif %}
+</div>

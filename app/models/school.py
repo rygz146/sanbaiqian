@@ -53,6 +53,7 @@ class School(db.Model):
     city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
     grades = db.relationship('SchoolGrade', backref='school', lazy='dynamic')
     classes = db.relationship('SchoolClass', backref='school', lazy='dynamic')
+    students = db.relationship('Child', backref='school', lazy='dynamic')
 
     @staticmethod
     def generate_fake(count=10):

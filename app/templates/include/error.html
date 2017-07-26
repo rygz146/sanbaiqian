@@ -1,15 +1,12 @@
 {% extends 'include/base.html' %}
 
-{% from 'macro/pagination.html' import render_pagination%}
-
 {% block nav %}
     {% include 'include/nav.html' %}
 {% endblock %}
 
-
 {% block content %}
-
-    {% include 'root/nav.html' %}
-
-
+<h1>{{ request.name }}</h1>
+<p>
+    <span>{{ request.description }}</span>
+</p>
 {% endblock %}

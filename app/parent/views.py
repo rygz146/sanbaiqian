@@ -4,7 +4,7 @@
 # @Author : trl
 from . import parent
 from ..models.user import parent_permission
-from flask import abort
+from flask import abort, render_template
 from ..log import Logger
 
 parent_log = Logger('parent_log', 'parent.log', True)
@@ -18,4 +18,4 @@ def parent_before_request():
 
 @parent.route('/')
 def index():
-    return 'parent'
+    return render_template('parent/index.html')

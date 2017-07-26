@@ -9,6 +9,5 @@ api = Blueprint('api',
                 url_prefix='/api')
 
 from . import (views,
-               tools,
-               errors)
+               tools)
 

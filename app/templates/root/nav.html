@@ -1,0 +1,18 @@
+<div class="nav">
+
+    <h5 class="nav-logo">站点管理员</h5>
+    <a class="nav-item" href="{{ url_for('auth.index') }}">返回系统选择</a>
+
+    {% if url_for('root.user_lists') is current_link %}
+    <strong class="nav-item">用户列表</strong>
+    {% else %}
+    <a href="{{ url_for('root.user_lists') }}" class="nav-item">用户列表</a>
+    {% endif %}
+
+    {% if url_for('root.school_lists') is current_link %}
+    <strong class="nav-item">学校列表</strong>
+    {% else %}
+    <a href="{{ url_for('root.school_lists') }}" class="nav-item">学校列表</a>
+    {% endif %}
+
+</div>

@@ -7,6 +7,7 @@ from flask import Blueprint
 
 root = Blueprint('root',
                  __name__,
+                 static_folder='static',
                  url_prefix='/root')
 
 from . import (views,)

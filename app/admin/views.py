@@ -5,7 +5,7 @@
 from . import admin
 from ..models.user import admin_permission
 from ..log import Logger
-from flask import abort
+from flask import abort, render_template
 
 admin_log = Logger('admin_log', 'admin.log', True)
 
@@ -19,4 +19,4 @@ def admin_before_request():
 @admin.route('/')
 def index():
 
-    return 'admin'
+    return render_template('admin/index.html')

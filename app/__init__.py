@@ -3,32 +3,22 @@
 # @Date   : 2017/7/12
 # @Author : trl
 from flask import Flask
-from .models import db, user
-from flask_login import LoginManager, current_user
-from flask_debugtoolbar import DebugToolbarExtension
-from flask_principal import Principal, identity_loaded, UserNeed, RoleNeed
+from .models import db
+from flask_login import current_user
+from flask_principal import identity_loaded, UserNeed, RoleNeed
 from .forms import csrf
 from flask_uploads import configure_uploads, patch_request_class
 from .upload import files
 import sys
+from .extend import (login_manager,
+                     toolbar,
+                     principal,
+                     my_template_filter,
+                     my_error_handler)
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-login_manager = LoginManager()
-login_manager.session_protection = 'strong'
-login_manager.login_view = 'auth.login'
-login_manager.login_message = u"当前页面需要登录才可访问"
-login_manager.login_message_category = "info"
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return user.User.query.get(user_id)
-
-
-toolbar = DebugToolbarExtension()
-principal = Principal()
 
 
 def create_app(config_name):
@@ -43,6 +33,8 @@ def create_app(config_name):
     csrf.init_app(app)
     configure_uploads(app, files)
     patch_request_class(app, 128 * 1024 * 1024)
+    my_template_filter.init_app(app)
+    my_error_handler.init_app(app)
 
     @identity_loaded.connect_via(app)
     def on_identity_loaded(sender, identity):
@@ -62,14 +54,6 @@ def create_app(config_name):
         if hasattr(current_user, 'roles'):
             for role in current_user.roles:
                 identity.provides.add(RoleNeed(role.name))
-
-    @app.errorhandler(404)
-    def app_400(request):
-        return '{code}: {name}'.format(code=request.code, name=request.name)
-
-    @app.template_filter('gender')
-    def gender(gen):
-        return '男' if gen else '女'
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

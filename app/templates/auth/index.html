@@ -1,7 +1,44 @@
-{% extends '__include/base.html' %}
+{% extends 'include/base.html' %}
 
 {% from 'macro/pagination.html' import render_pagination%}
 
 {% block nav %}
-    {% include '__include/nav.html' %}
+    {% include 'include/nav.html' %}
+{% endblock %}
+
+{% block content %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class=flashes>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <table class="table">
+    <thead>
+        <tr>
+            <td>角色</td>
+            <td>操作</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for role in current_user.roles %}
+            <tr>
+                <td>{{ role.name | role }}</td>
+                <td><a href="{{ url_for(role.name + '.index') }}">进入{{ role.name | role }}系统</a></td>
+            </tr>
+        {% endfor %}
+        {% for role in roles_table.itervalues() %}
+            <tr>
+                <td>{{ role | role }}</td>
+                <td><a href="{{ url_for('auth.apply_role', role_name=role) }}">成为{{ role | role }}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+
 {% endblock %}

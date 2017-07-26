@@ -11,4 +11,4 @@ files = UploadSet('files')
 
 def md5_filename(user, filename):
 
-    return md5(user.uniqueID + filename).hexdigest().upper() + '.{}'.format(filename.split('.')[1])
+    return md5(user.uniqueID + filename).hexdigest().upper() + '.{}'.format(filename.split('.')[-1])

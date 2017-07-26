@@ -1,0 +1,45 @@
+{% extends 'include/base.html' %}
+
+{% from 'macro/pagination.html' import render_pagination%}
+
+{% block nav %}
+    {% include 'include/nav.html' %}
+{% endblock %}
+
+
+{% block content %}
+    {% include 'root/nav.html' %}
+    <table class="table">
+        <thead>
+        <tr>
+            <td></td>
+            <td>用户名</td>
+            <td>身份</td>
+            <td>姓名</td>
+            <td>性别</td>
+            <td>学校</td>
+            <td>邮编</td>
+            <td>创建时间</td>
+        </tr>
+        </thead>
+        <tbody>
+            {% for user in users | sort(attribute='create_time') %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{% for role in user.roles.all() %}{{ role.name | role }} {% endfor %}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.gender | gender }}</td>
+                    <td>{% for school in user.schools %}{{ school.name }}{% endfor %}</td>
+                    <td>{% for school in user.schools %}{{ school.city.zip_code }}{% endfor %}</td>
+                    <td>{{ user.create_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pagination %}
+        {{ render_pagination(pagination, 'root.user_lists') }}
+    {% endif %}
+
+{% endblock %}

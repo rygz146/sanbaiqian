@@ -1,9 +1,9 @@
-{% extends '__include/base.html' %}
+{% extends 'include/base.html' %}
 
 {% from 'macro/pagination.html' import render_pagination%}
 
 {% block nav %}
-    {% include '__include/nav.html' %}
+    {% include 'include/nav.html' %}
 {% endblock %}
 
 {% block content %}
@@ -18,22 +18,7 @@
         {% endif %}
     {% endwith %}
 
-    <div class="cards">
-        <div class="card">
-            <div class="card-header"><h5>{{ current_user.username }}</h5></div>
-            <div class="card-body">
-                <ul>
-                    <li>{{ current_user.uniqueID }}</li>
-                    {% for role in current_user.roles.all() %}
-                    <li><a href="{{ url_for(role.name+'.index') }}">进入{{ role.name }}界面</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="card-footer center text-center"><p>创建于 {{ current_user.create_time }}</p></div>
-        </div>
-    </div>
-
-    <form action="{{ url_for('auth.upload') }}" method="post" enctype="multipart/form-data" >
+    <form action="{{ url_for('auth.upload_file') }}" method="post" enctype="multipart/form-data" >
         {{ form.hidden_tag() }}
         {{ form.files.lable }} {{ form.files(required='required', multiple="multiple") }}
         {% for error in form.files.errors %}
@@ -59,14 +44,14 @@
                 <td>{{ f.name }}</td>
                 <td>{{ f.size }}</td>
                 <td>{{ f.create_time }}</td>
-                <td><a href="{{ url_for('auth.show', file_id=f.id) }}" target="_blank">预览</a> | <a href="{{ url_for('auth.download', file_id=f.id) }}">下载</a> | <a href="">删除</a></td>
+                <td><a href="{{ url_for('auth.download_file', file_id=f.id) }}">下载</a> | <a href="{{ url_for('auth.delete_file', file_id=f.id) }}">删除</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
     {% if pagination %}
-        {{ render_pagination(pagination, 'auth.information') }}
+        {{ render_pagination(pagination, 'auth.file_system') }}
     {% endif %}
 
 {% endblock %}

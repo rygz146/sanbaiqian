@@ -5,8 +5,9 @@
 from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from itsdangerous import BadSignature, BadTimeSignature
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
+                          SignatureExpired,
+                          BadTimeSignature)
 from flask import current_app
 from flask_principal import Permission, RoleNeed
 from sqlalchemy.exc import IntegrityError
@@ -14,6 +15,8 @@ from random import seed, choice
 import forgery_py
 import uuid
 from school import School
+from datetime import datetime
+
 
 ROLES = ['root', 'admin', 'teacher', 'parent']
 
@@ -32,12 +35,8 @@ class Role(db.Model):
 
     @staticmethod
     def insert_role():
-        for r in ROLES:
-            role = Role.query.filter_by(name=r).first()
-            if role is None:
-                role = Role(name=r, description=r)
-                db.session.add(role)
-                db.session.commit()
+        db.session.add_all(map(lambda r: Role(name=r, description=r), ROLES))
+        db.session.commit()
 
     def __repr__(self):
         return "<Role id: {}>".format(self.id)
@@ -62,6 +61,7 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     password_hash = db.Column(db.String(128))
     gender = db.Column(db.Boolean, default=True)
     phone = db.Column(db.String(20), unique=True)
@@ -101,7 +101,9 @@ class User(db.Model, UserMixin):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-        except (BadSignature, BadTimeSignature):
+        except SignatureExpired:
+            return None
+        except BadTimeSignature:
             return None
         else:
             return User.query.get(data['id'])
@@ -114,6 +116,7 @@ class User(db.Model, UserMixin):
             s = School.query.get(choice([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
             u = User(username=forgery_py.internet.user_name(True),
                      password='123456',
+                     name=forgery_py.internet.user_name(),
                      gender=choice([True, False]),
                      create_time=forgery_py.date.date(past=True),
                      phone=forgery_py.address.phone())
@@ -162,6 +165,7 @@ class Child(db.Model):
     name = db.Column(db.String(256), nullable=False)
     age = db.Column(db.Integer)
     gender = db.Column(db.Boolean)
+    school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     school_class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'))
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     birthday = db.Column(db.Date())
@@ -169,6 +173,7 @@ class Child(db.Model):
 
     def __init__(self, **kwargs):
         super(Child, self).__init__(**kwargs)
+        self.age = int(datetime.now().year - self.birthday.year)
 
     def __repr__(self):
         return '<Child id: {}>'.format(self.id)
