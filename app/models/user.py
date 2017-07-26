@@ -61,7 +61,7 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
-    name = db.Column(db.String(64), default='三百千用户')
+    name = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
     gender = db.Column(db.Boolean, default=True)
     phone = db.Column(db.String(20), unique=True)
