@@ -20,7 +20,7 @@ class Config(object):
 
 
 class ProductionConfig(Config):
-    DATABASE_URI = 'mysql://user@localhost/foo'
+    pass
 
 
 class DevelopmentConfig(Config):
