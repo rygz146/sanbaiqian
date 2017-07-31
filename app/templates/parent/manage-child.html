@@ -1,0 +1,37 @@
+{% extends 'include/base.html' %}
+
+{% from 'macro/pagination.html' import render_pagination%}
+
+{% block nav %}
+    {% include 'include/nav.html' %}
+{% endblock %}
+
+
+{% block content %}
+
+    {% include 'parent/nav.html' %}
+
+    <form action="{{ url_for('parent.manage_child', do_type='add') }}" method="post">
+
+        {{ form.hidden_tag() }}
+
+        {{ form.name.label }} {{ form.name(required='required') }}
+        {% for error in form.name.errors %}
+            <strong style="color: red">{{ error }}</strong><br>
+        {% endfor %}
+
+        {{ form.gender.label }} {{ form.gender(require='required') }}
+        {% for error in form.gender.errors %}
+            <strong style="color: red">{{ error }}</strong><br>
+        {% endfor %}
+
+        {{ form.birthday.label }} {{ form.birthday(require='required') }}
+        {% for error in form.birthday.errors %}
+            <strong style="color: red">{{ error }}</strong><br>
+        {% endfor %}
+
+        {{ form.submit }}
+
+    </form>
+
+{% endblock %}

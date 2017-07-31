@@ -6,6 +6,8 @@ from . import db
 from sqlalchemy.exc import IntegrityError
 from random import seed
 import forgery_py
+import os
+import xlrd
 
 
 class City(db.Model):
@@ -18,8 +20,22 @@ class City(db.Model):
     province = db.Column(db.String(128), nullable=False, index=True)
     district = db.Column(db.String(128), nullable=False)
     county = db.Column(db.String(128), nullable=False)
-    zip_code = db.Column(db.Integer, index=True)
+    zip_code = db.Column(db.String(12), index=True)
     schools = db.relationship('School', backref='city', lazy='dynamic')
+
+    @staticmethod
+    def create_db():
+        f_path = os.path.join(os.path.abspath(os.path.curdir) + os.sep + 'doc' + os.sep + 'zipcode.xls')
+        with xlrd.open_workbook(f_path) as f:
+            sheet = f.sheet_by_index(0)
+            for i in range(sheet.nrows):
+                city = City(province=sheet.row_values(i)[0],
+                            district=sheet.row_values(i)[1],
+                            county=sheet.row_values(i)[2],
+                            zip_code='{:0>6}'.format(int(sheet.row_values(i)[3])))
+                db.session.add(city)
+                db.session.flush()
+        db.session.commit()
 
     @staticmethod
     def generate_fake(count=10):

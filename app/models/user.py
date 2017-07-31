@@ -97,6 +97,22 @@ class User(db.Model, UserMixin):
         return s.dumps({'id': self.id})
 
     @staticmethod
+    def create_user(username, password, roles=None, name=None, gender=None, phone=None):
+        user = User(username=username,
+                    password=password,
+                    name=name,
+                    gender=gender,
+                    phone=phone)
+        if not isinstance(roles, (tuple, list)):
+            raise TypeError('roles must be tuple or list')
+        for r in roles:
+            if not isinstance(r, Role):
+                raise TypeError('roles\'s item must be class <Role>')
+            user.roles.append(r)
+        db.session.add(user)
+        db.session.commit()
+
+    @staticmethod
     def verify_auth_token(token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:

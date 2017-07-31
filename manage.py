@@ -18,17 +18,41 @@ manager.add_command('db', MigrateCommand)
 
 @manager.shell
 def make_shell_context():
-    return dict(app=app, db=db)
+    return dict(app=app, db=db, school=school)
 
 
 @manager.command
 def init_test_db():
+    """
+    创建测试数据
+    :return: 
+    """
     db.drop_all()
     db.create_all()
     user.Role.insert_role()
     school.City.generate_fake()
     school.School.generate_fake()
     user.User.generate_fake()
+
+
+@manager.command
+def init_db():
+    """
+    创建正式数据
+    :return: 
+    """
+    db.drop_all()
+    db.create_all()
+    user.Role.insert_role()
+    school.City.create_db()
+    roles = user.Role.query.filter_by(name='root').all()
+    user.User.create_user(username='root',
+                          password='123456',
+                          roles=roles,
+                          name='root',
+                          gender=True,
+                          phone='')
+
 
 if __name__ == '__main__':
     manager.run()
