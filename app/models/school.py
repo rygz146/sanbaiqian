@@ -16,10 +16,9 @@ class City(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     province = db.Column(db.String(128), nullable=False, index=True)
-    province_code = db.Column(db.Integer, index=True)
     district = db.Column(db.String(128), nullable=False)
     county = db.Column(db.String(128), nullable=False)
-    zip_code = db.Column(db.Integer, unique=True, index=True)
+    zip_code = db.Column(db.Integer, index=True)
     schools = db.relationship('School', backref='city', lazy='dynamic')
 
     @staticmethod
@@ -27,7 +26,6 @@ class City(db.Model):
         seed()
         for i in range(count):
             c = City(province=forgery_py.address.city(),
-                     province_code=forgery_py.address.zip_code(),
                      district=forgery_py.address.city(),
                      county=forgery_py.address.street_name(),
                      zip_code=forgery_py.address.zip_code())

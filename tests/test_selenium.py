@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/26
 # @Author : trl
-# coding=utf-8
+
 import unittest
 import threading
 from selenium import webdriver
