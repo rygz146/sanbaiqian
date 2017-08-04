@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
-from . import db
-from sqlalchemy.exc import IntegrityError
-from random import seed
 import forgery_py
 import os
 import xlrd
+
+from sqlalchemy.exc import IntegrityError
+from random import seed
+
+from . import db
 
 
 class City(db.Model):
@@ -18,7 +20,7 @@ class City(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     province = db.Column(db.String(128), nullable=False, index=True)
-    district = db.Column(db.String(128), nullable=False)
+    district = db.Column(db.String(128), nullable=False, index=True)
     county = db.Column(db.String(128), nullable=False)
     zip_code = db.Column(db.String(12), index=True)
     schools = db.relationship('School', backref='city', lazy='dynamic')

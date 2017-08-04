@@ -1,0 +1,79 @@
+{% extends 'include/base.html' %}
+
+{% from 'macro/pagination.html' import render_pagination%}
+
+{% block nav %}
+    {% include 'include/nav.html' %}
+{% endblock %}
+
+
+{% block content %}
+
+    <div>
+        <div id="city">
+            点击按钮获取相应信息
+        </div>
+        <button id="get_province">获取省份</button>
+        <button id="get_district">获取市（区）</button>
+        <button id="get_county">获取县</button>
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <td></td>
+            <td>名字</td>
+            <td>省份</td>
+            <td>市（区）</td>
+            <td>县</td>
+            <td>邮编</td>
+            <td>创建时间</td>
+        </tr>
+        </thead>
+        <tbody>
+            {% for school in schools | sort(attribute='create_time') %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ school.name }}</td>
+                    <td>{{ school.city.province }}</td>
+                    <td>{{ school.city.district }}</td>
+                    <td>{{ school.city.county }}</td>
+                    <td>{{ school.city.zip_code }}</td>
+                    <td>{{ school.create_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pagination %}
+        {{ render_pagination(pagination, 'main.school_lists') }}
+    {% endif %}
+
+{% endblock %}
+
+
+{% block javascript %}
+
+    <script>
+        $(document).ready(function () {
+            $("#get_province").click(function () {
+                var city = $("#city");
+                $.ajax({
+                    url: $API_ROOT + '/province',
+                    type: 'GET',
+                    success: function(data) {
+                        city.empty();
+                        $.each(data.data, function (index, item) {
+                           var p = $("<p></p>");
+                           p.text(item.province).fadeIn(1000).appendTo(city);
+                       });
+                    },
+                    error: function () {
+                        city.text('数据加载失败，请重试');
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

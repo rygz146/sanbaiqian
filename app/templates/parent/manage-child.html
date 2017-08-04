@@ -34,4 +34,33 @@
 
     </form>
 
+    <table class="table">
+        <thead>
+        <tr>
+            <td></td>
+            <td>姓名</td>
+            <td>性别</td>
+            <td>生日</td>
+            <td>学校</td>
+            <td>班级</td>
+        </tr>
+        </thead>
+        <tbody>
+            {% for child in children | sort(attribute='create_time') %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ child.name }}</td>
+                    <td>{{ child.gender | gender }}</td>
+                    <td>{{ child.birthday }}</td>
+                    <td>{{ child.school.name }}</td>
+                    <td>{{ child.class.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pagination %}
+        {{ render_pagination(pagination, 'parent.child_lists') }}
+    {% endif %}
+
 {% endblock %}

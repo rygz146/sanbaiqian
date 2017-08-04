@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/18
 # @Author : trl
+from flask import abort, render_template
+
 from . import teacher
 from ..models.user import teacher_permission
 from ..log import Logger
-from flask import abort, render_template
+
 
 teacher_log = Logger('teacher_log', 'teacher.log', True)
 

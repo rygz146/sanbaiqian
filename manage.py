@@ -3,10 +3,11 @@
 # @Date   : 2017/7/12
 # @Author : trl
 from flask_script import Manager
+from flask_migrate import Migrate, MigrateCommand
+
 from app import create_app
 from app.config import DevelopmentConfig
 from app.models import db, school, user
-from flask_migrate import Migrate, MigrateCommand
 
 app = create_app(DevelopmentConfig)
 
@@ -33,6 +34,13 @@ def init_test_db():
     school.City.generate_fake()
     school.School.generate_fake()
     user.User.generate_fake()
+    roles = user.Role.query.filter_by(name='root').all()
+    user.User.create_user(username='root',
+                          password='123456',
+                          roles=roles,
+                          name='root',
+                          gender=True,
+                          phone='')
 
 
 @manager.command

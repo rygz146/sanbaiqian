@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
-from . import main
-from flask import current_app, render_template, abort, request
+from flask import current_app, render_template, abort, request, g
 from flask_sqlalchemy import get_debug_queries
+
 from app.log import Logger, slow_query_log
 
+from . import main
+from ..models.school import School
 
 main_log = Logger('main_log', 'main.log', True)
 
@@ -40,3 +42,14 @@ def index():
 
     return render_template('main/index.html',
                            title='首页')
+
+
+@main.route('/schools', methods=['GET', 'POST'])
+def school_lists():
+    page = request.args.get('page', 1, int)
+    pagination = School.query.paginate(page=page, per_page=5, error_out=False)
+    schools = pagination.items
+
+    return render_template('main/school-lists.html',
+                           pagination=pagination,
+                           schools=schools)

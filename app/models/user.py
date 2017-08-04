@@ -2,20 +2,24 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
-from . import db
+import forgery_py
+import uuid
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer,
                           SignatureExpired,
-                          BadTimeSignature)
+                          BadTimeSignature,
+                          BadSignature)
 from flask import current_app
 from flask_principal import Permission, RoleNeed
 from sqlalchemy.exc import IntegrityError
 from random import seed, choice
-import forgery_py
-import uuid
 from school import School
 from datetime import datetime
+from hashlib import md5
+
+from . import db
 
 
 ROLES = ['root', 'admin', 'teacher', 'parent']
@@ -89,7 +93,7 @@ class User(db.Model, UserMixin):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def generate_auth_token(self, expiration):
+    def generate_auth_token(self, expiration=7200):
         s = Serializer(
             current_app.config['SECRET_KEY'],
             expires_in=expiration
@@ -117,7 +121,7 @@ class User(db.Model, UserMixin):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
-        except SignatureExpired:
+        except (SignatureExpired, BadSignature, TypeError):
             return None
         except BadTimeSignature:
             return None
@@ -166,6 +170,12 @@ class UploadFile(db.Model):
     @classmethod
     def has_file(cls, md5_name):
         return cls.query.filter_by(md5_name=md5_name).first()
+
+    @staticmethod
+    def md5_filename(user, filename):
+        if not issubclass(user, User):
+            raise TypeError('user must be Class <User>')
+        return md5(user.uniqueID + filename).hexdigest().upper() + '.{}'.format(filename.split('.')[-1])
 
     def __init__(self, **kwargs):
         super(UploadFile, self).__init__(**kwargs)

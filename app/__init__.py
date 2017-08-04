@@ -2,16 +2,18 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
-from flask import Flask
-from .models import db
+import sys
+from flask import Flask, g
+
 from flask_login import current_user
 from flask_principal import identity_loaded, UserNeed, RoleNeed
-from .forms import csrf
 from flask_uploads import configure_uploads, patch_request_class
-from .upload import files
-import sys
+
+from .forms import csrf
+from .models import db
 from .extend import (login_manager,
                      toolbar,
+                     files,
                      principal,
                      my_template_filter,
                      my_error_handler)
@@ -45,6 +47,9 @@ def create_app(config_name):
 
         # Set the identity user object
         identity.user = current_user
+
+        # Add current_user to global user
+        g.user = current_user
 
         # Add the UserNeed to the identity user object
         if hasattr(current_user, 'id'):

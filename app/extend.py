@@ -2,17 +2,26 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/25
 # @Author : trl
-"""app扩展
+
+"""
+app.extend
 ~~~~~~~~~~~~~~~~~
+
 插件引入
 自定义模板过滤器
 自定义状态码页面
 """
+
 from flask import render_template, request
 from flask_login import LoginManager
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_principal import Principal
+from flask_uploads import UploadSet
+
 from .models import user
+
+
+files = UploadSet('files')
 
 
 class MyTemplateFilter(object):

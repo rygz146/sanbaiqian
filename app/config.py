@@ -3,10 +3,12 @@
 # @Date   : 2017/7/12
 # @Author : trl
 import os
+
 from flask_uploads import DEFAULTS, AUDIO, ARCHIVES
 
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 EXTEND = tuple('mp4 avi rm rmvb ppt pptx exe'.split())
 
 
@@ -15,7 +17,7 @@ class Config(object):
     TESTING = False
     CSRF_ENABLED = True
     FLASKY_SLOW_DB_QUERY_TIME = 0.1
-    UPLOADED_FILES_DEST = os.path.join(basedir, 'uploads')
+    UPLOADED_FILES_DEST = os.path.join(BASE_DIR, 'uploads')
     UPLOADED_FILES_ALLOW = DEFAULTS + AUDIO + ARCHIVES + EXTEND
 
 
@@ -25,7 +27,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_ECHO = True
 

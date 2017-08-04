@@ -2,8 +2,15 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/21
 # @Author : trl
-from bs4 import BeautifulSoup
+"""
+app.data_spider.zip_code
+~~~~~~~~~~~~~~~~~~~~
+
+获取全国邮编，但是数据处理没做好，需要再完善
+"""
 import requests
+
+from bs4 import BeautifulSoup
 from datetime import datetime
 
 
@@ -30,7 +37,7 @@ def yield_province_city_url():
                 yield url[0], city.get_text(), host + url[1] + city.parent.get('href')
 
 
-def yield_data1():
+def get_data1():
     host = 'http://www.ip138.com'
     for url in yield_province_url():
         city_flag = 0
@@ -57,7 +64,7 @@ def yield_data1():
                     pass
 
 
-def yield_data2():
+def get_data2():
     for province, city, url, in yield_province_city_url():
         response = requests.get(url)
         response.encoding = response.apparent_encoding
@@ -78,5 +85,5 @@ def yield_data2():
 
 
 if __name__ == '__main__':
-    yield_data1()
-    yield_data2()
+    get_data1()
+    get_data2()

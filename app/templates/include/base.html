@@ -12,4 +12,9 @@
         {% block content %}{% endblock %}
     </div>
 </body>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.12.4.min.js') }}"></script>
+<script type="text/javascript">
+    $API_ROOT = {{ request.url_root|tojson|safe }} + 'api';
+</script>
+{% block javascript %}{% endblock %}
 </html>

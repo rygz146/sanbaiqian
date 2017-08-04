@@ -7,7 +7,7 @@ from wtforms import StringField, DateField, SelectField, SubmitField
 from wtforms.validators import DataRequired
 
 
-class Child(FlaskForm):
+class ChildForm(FlaskForm):
     name = StringField(label='姓名', validators=[DataRequired(message='请输入孩子姓名')])
     gender = SelectField(label='性别', coerce=bool, choices=[(True, '男'), (False, '女')])
     birthday = DateField(label='出生年月')

@@ -7,6 +7,12 @@
     <a class="nav-item" href="{{ url_for('main.index') }}">首页</a>
     {% endif %}
 
+    {% if url_for('main.school_lists') is current_link %}
+    <strong class="nav-item">学校列表</strong>
+    {% else %}
+    <a class="nav-item" href="{{ url_for('main.school_lists') }}">学校列表</a>
+    {% endif %}
+
     {% if current_user.is_anonymous %}
         <a href="{{ url_for('auth.login') }}" class="nav-item">登录</a>
         <a href="{{ url_for('auth.register') }}" class="nav-item">注册</a>

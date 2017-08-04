@@ -8,6 +8,5 @@ api = Blueprint('api',
                 __name__,
                 url_prefix='/api')
 
-from . import (views,
-               tools)
+from . import (school)
 

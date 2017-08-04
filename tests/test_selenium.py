@@ -3,15 +3,18 @@
 # @Date   : 2017/7/26
 # @Author : trl
 
+
+import re
+import time
+import forgery_py
 import unittest
 import threading
+
 from selenium import webdriver
+
 from app import create_app, db
 from app.config import TestingConfig
 from app.models.user import Role, User
-import re
-import forgery_py
-import time
 
 
 class SeleniumTest(unittest.TestCase):

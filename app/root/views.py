@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/18
 # @Author : trl
+from flask import abort, render_template, request
+
 from app.root import root
 from app.models.user import root_permission, User, School
 from app.log import Logger
-from flask import abort, render_template, request
+
 
 root_log = Logger('root_log', 'root.log', True)
 
@@ -39,6 +41,6 @@ def school_lists():
     pagination = School.query.paginate(page=page, per_page=5, error_out=False)
     schools = pagination.items
 
-    return render_template('root/school_lists.html',
+    return render_template('root/school-lists.html',
                            pagination=pagination,
                            schools=schools)

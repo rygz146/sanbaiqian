@@ -2,17 +2,26 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
+import os
+
+from flask_login import login_user, logout_user, login_required, current_user
+from flask_principal import identity_changed, Identity, AnonymousIdentity
+from flask import (render_template,
+                   current_app,
+                   redirect,
+                   request,
+                   url_for,
+                   flash,
+                   abort,
+                   send_from_directory)
+
+from app.log import Logger
+from app.extend import files
+
 from . import auth
 from ..models.user import db, User, UploadFile, Role
-from flask_login import login_user, logout_user, login_required, current_user
-from flask import render_template, current_app, redirect, request, url_for, \
-    flash, abort, send_from_directory
-from flask_principal import identity_changed, Identity, AnonymousIdentity
 from ..forms.user import LoginForm, RegisterForm
 from ..forms.upload import UploadForm
-from app.log import Logger
-from ..upload import files, md5_filename
-import os
 
 
 auth_log = Logger('auth_log', 'auth.log', True)
@@ -127,7 +136,7 @@ def upload_file():
         upload_files = form.files.raw_data
         for f in upload_files:
             real_name = f.filename
-            f.filename = md5_filename(current_user, real_name)
+            f.filename = UploadFile.md5_filename(current_user, real_name)
             if UploadFile.has_file(f.filename):
                 flash('文件{}已经存在'.format(real_name), category='warning')
             else:

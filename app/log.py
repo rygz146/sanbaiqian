@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/13
 # @Author : trl
+"""
+日志公共类初始化方法
+~~~~~~~~~~~~~~~~~~~~
+
+不加参数则生成实例后自动记录console的内容
+log_name: 日志名字
+log_file: 日志文件
+log_debug: True 开启调试，false 关闭调试
+"""
+import os
 import logging
+
 from logging.handlers import TimedRotatingFileHandler
 
 
 class Logger(object):
-    """日志器
-    不加参数则生成实例后自动记录console的内容
-    """
 
     def __init__(self, log_name='', log_file='', log_debug=False):
-        """
-        日志公共类初始化方法
-        :param log_name: 日志名字
-        :param log_file: 日志文件
-        :param log_debug: True 开启调试，false 关闭调试
-        :return:
-        """
-        import os
         log_path = os.path.dirname(__file__).replace('app', 'log')
         self._log_debug = log_debug
         _format = '%(asctime)s %(levelname)s\n%(message)s\n'
