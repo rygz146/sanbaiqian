@@ -1,34 +1,46 @@
-<div class="nav">
-    <h5 class="nav-logo">Logo</h5>
+<header class="am-topbar">
+    <h1 class="am-topbar-brand">
+        <strong>Logo</strong>
+    </h1>
 
-    {% if url_for('main.index') is current_link %}
-    <strong class="nav-item">首页</strong>
-    {% else %}
-    <a class="nav-item" href="{{ url_for('main.index') }}">首页</a>
-    {% endif %}
+    <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#doc-topbar-collapse'}"><span class="am-sr-only">导航切换</span> <span class="am-icon-bars"></span></button>
 
-    {% if url_for('main.school_lists') is current_link %}
-    <strong class="nav-item">学校列表</strong>
-    {% else %}
-    <a class="nav-item" href="{{ url_for('main.school_lists') }}">学校列表</a>
-    {% endif %}
+    <div class="am-collapse am-topbar-collapse" id="doc-topbar-collapse">
+        <ul class="am-nav am-nav-pills am-topbar-nav">
+            {% if url_for('main.index') is current_link %}
+                <li class="am-active"><a href="javascript:void(0);">首页</a></li>
+            {% else %}
+                <li><a href="{{ url_for('main.index') }}">首页</a></li>
+            {% endif %}
 
-    {% if current_user.is_anonymous %}
-        <a href="{{ url_for('auth.login') }}" class="nav-item">登录</a>
-        <a href="{{ url_for('auth.register') }}" class="nav-item">注册</a>
-    {% else %}
-        {% if url_for('auth.file_system') is current_link %}
-        <strong class="nav-item">文件系统</strong>
-        {% else %}
-        <a href="{{ url_for('auth.file_system') }}" class="nav-item">文件系统</a>
-        {% endif %}
+            {% if url_for('main.school_lists') is current_link %}
+                <li class="am-active"><a href="{{ url_for('main.school_lists') }}">学校列表</a></li>
+            {% else %}
+                <li><a href="{{ url_for('main.school_lists') }}">学校列表</a></li>
+            {% endif %}
 
-        {% if url_for('auth.index') is current_link %}
-        <strong class="nav-item">{{ current_user.username }}</strong>
-        {% else %}
-        <a href="{{ url_for('auth.index') }}" class="nav-item">{{ current_user.username }}</a>
-        {% endif %}
-
-        <a href="{{ url_for('auth.logout') }}" class="nav-item">退出</a>
-    {% endif %}
-</div>
+            {% if url_for('auth.file_system') is current_link %}
+                <li class="am-active"><a href="{{ url_for('auth.file_system') }}">文件系统</a></li>
+            {% else %}
+                <li><a href="{{ url_for('auth.file_system') }}">文件系统</a></li>
+            {% endif %}
+        </ul>
+        <div class="am-topbar-right">
+            {% if current_user.is_anonymous %}
+                <a href="{{ url_for('auth.login') }}">
+                    <button class="am-btn am-btn-primary am-topbar-btn am-btn-sm">登录</button>
+                </a>
+                <a href="{{ url_for('auth.register') }}">
+                    <button class="am-btn am-btn-primary am-topbar-btn am-btn-sm">注册</button>
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.index') }}">
+                    <button class="am-btn am-btn-primary am-topbar-btn am-btn-sm">{{ current_user.username }}</button>
+                </a>
+                <a href="{{ url_for('auth.logout') }}">
+                    <button class="am-btn am-btn-primary am-topbar-btn am-btn-sm">退出</button>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</header>

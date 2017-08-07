@@ -8,26 +8,24 @@
 
 {% block content %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class=flashes>
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% include 'include/flash.html' %}
 
-    <form action="{{ url_for('auth.upload_file') }}" method="post" enctype="multipart/form-data" >
+    <form class="am-form" action="{{ url_for('auth.upload_file') }}" method="post" enctype="multipart/form-data" >
         {{ form.hidden_tag() }}
-        {{ form.files.lable }} {{ form.files(required='required', multiple="multiple") }}
+        <div class="am-form-group">
+            {{ form.files.lable }}
+            {{ form.files(required='required', multiple="multiple") }}
+        </div>
         {% for error in form.files.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
-        {{ form.submit }}
+        {{ form.submit(class='am-btn am-btn-primary') }}
     </form>
 
-    <table class="table">
+    <table class="am-table">
         <thead>
         <tr>
             <td></td>
@@ -44,7 +42,7 @@
                 <td>{{ f.name }}</td>
                 <td>{{ f.size }}</td>
                 <td>{{ f.create_time }}</td>
-                <td><a href="{{ url_for('auth.download_file', file_id=f.id) }}">下载</a> | <a href="{{ url_for('auth.delete_file', file_id=f.id) }}">删除</a></td>
+                <td><a href="{{ url_for('auth.preview_file', file_id=f.id) }}" target="_blank">预览</a> | <a href="{{ url_for('auth.download_file', file_id=f.id) }}">下载</a> | <a href="{{ url_for('auth.delete_file', file_id=f.id) }}">删除</a></td>
             </tr>
         {% endfor %}
         </tbody>

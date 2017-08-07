@@ -61,34 +61,35 @@ class MyErrorHandler(object):
     @staticmethod
     def init_app(app):
         @app.errorhandler(400)
-        def app_400(req):
+        def app_400(error):
             return render_template('include/error.html',
-                                   request=req,
-                                   title=req.code), 400
+                                   error=error,
+                                   title=error.code), 400
 
         @app.errorhandler(403)
-        def app_403(req):
+        def app_403(error):
+            print dir(error)
             return render_template('include/error.html',
-                                   request=req,
-                                   title=req.code), 403
+                                   error=error,
+                                   title=error.code), 403
 
         @app.errorhandler(404)
-        def app_404(req):
+        def app_404(error):
             return render_template('include/error.html',
-                                   request=req,
-                                   title=req.code), 404
+                                   error=error,
+                                   title=error.code), 404
 
         @app.errorhandler(410)
-        def app_410(req):
+        def app_410(error):
             return render_template('include/error.html',
-                                   request=req,
-                                   title=req.code), 410
+                                   error=error,
+                                   title=error.code), 410
 
         @app.errorhandler(500)
-        def app_500(req):
+        def app_500(error):
             return render_template('include/error.html',
-                                   request=req,
-                                   title=req.code), 500
+                                   error=error,
+                                   title=error.code), 500
 
 
 login_manager = LoginManager()

@@ -1,0 +1,10 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="am-alert am-alert-{{ category }}" data-am-alert>
+            <button type="button" class="am-close">&times;</button>
+            <p>{{ message }}</p>
+        </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}

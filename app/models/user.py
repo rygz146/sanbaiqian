@@ -173,8 +173,6 @@ class UploadFile(db.Model):
 
     @staticmethod
     def md5_filename(user, filename):
-        if not issubclass(user, User):
-            raise TypeError('user must be Class <User>')
         return md5(user.uniqueID + filename).hexdigest().upper() + '.{}'.format(filename.split('.')[-1])
 
     def __init__(self, **kwargs):

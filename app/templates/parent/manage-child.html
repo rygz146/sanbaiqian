@@ -11,30 +11,55 @@
 
     {% include 'parent/nav.html' %}
 
-    <form action="{{ url_for('parent.manage_child', do_type='add') }}" method="post">
+    <form class="am-form" action="{{ url_for('parent.manage_child', do_type='add') }}" method="post">
 
         {{ form.hidden_tag() }}
 
-        {{ form.name.label }} {{ form.name(required='required') }}
+        <div class="am-form-group">
+            {{ form.name.label }}
+            {{ form.name(required='required') }}
+        </div>
         {% for error in form.name.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
 
-        {{ form.gender.label }} {{ form.gender(require='required') }}
+        <div class="am-form-group">
+            {{ form.gender.label }}
+            {{ form.gender(require='required') }}
+        </div>
         {% for error in form.gender.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
 
-        {{ form.birthday.label }} {{ form.birthday(require='required') }}
+        <div class="am-form-group">
+            {{ form.birthday.label }}
+            <div class="am-input-group am-datepicker-date" data-am-datepicker="{format: 'yyyy-mm-dd', viewMode: 'years'}">
+                {{ form.birthday(class="am-form-field", readonly='readonly', require='required') }}
+                <span class="am-input-group-btn am-datepicker-add-on">
+                    <button class="am-btn am-btn-default" type="button">
+                        <span class="am-icon-calendar"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
         {% for error in form.birthday.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
 
-        {{ form.submit }}
+        {{ form.submit(class='am-btn am-btn-primary') }}
 
     </form>
 
-    <table class="table">
+    <table class="am-table">
         <thead>
         <tr>
             <td></td>

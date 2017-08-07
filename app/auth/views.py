@@ -70,13 +70,13 @@ def apply_role(role_name):
     user_roles = [r.name for r in current_user.roles]
     if role_name in roles_table:
         if role_name in user_roles:
-            flash(message='您已经拥有该角色，不能重复申请', category='error')
+            flash(message='您已经拥有该角色，不能重复申请', category='warning')
         else:
             current_user.roles.append(Role.query.filter_by(name=role_name).first())
             db.session.add(current_user)
             db.session.commit()
     else:
-        flash(message='该角色不在您的可申请范围，请联系管理员', category='error')
+        flash(message='该角色不在您的可申请范围，请联系管理员', category='danger')
 
     return redirect(url_for('auth.index'))
 
@@ -94,7 +94,7 @@ def login():
             )
             return form.redirect('auth.index')
         else:
-            flash(message='用户名或密码错误', category='error')
+            flash(message='用户名或密码错误', category='danger')
 
     return render_template('auth/login.html',
                            title='登录',
@@ -151,7 +151,7 @@ def upload_file():
                     db.session.add(new_file)
                 except:
                     db.session.rollback()
-                    flash('文件{}上传失败'.format(real_name), category='error')
+                    flash('文件{}上传失败'.format(real_name), category='danger')
                 else:
                     db.session.commit()
 
@@ -172,6 +172,21 @@ def download_file(file_id):
             db.session.delete(f)
             db.session.commit()
             abort(410)
+    else:
+        abort(403)
+
+
+@auth.route('/preview/<file_id>/')
+@login_required
+def preview_file(file_id):
+    f = UploadFile.query.get_or_404(file_id)
+    if f.user == current_user:
+        if os.path.isfile(os.path.join(current_app.config['UPLOADED_FILES_DEST'], f.path)):
+            return send_from_directory(current_app.config['UPLOADED_FILES_DEST'],
+                                       f.path,
+                                       attachment_filename=f.name)
+        else:
+            abort(404)
     else:
         abort(403)
 

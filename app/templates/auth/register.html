@@ -2,37 +2,47 @@
 
 {% block content %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class=flashes>
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {% include 'include/flash.html' %}
 
-    <form action="{{ url_for('auth.register') }}" method="post">
+    <form class="am-form" action="{{ url_for('auth.register') }}" method="post">
 
         {{ form.hidden_tag() }}
 
-        {{ form.username.label }} {{ form.username(required='required') }}
+        <div class="am-form-group">
+            {{ form.username.label }}
+            {{ form.username(required='required') }}
+        </div>
         {% for error in form.username.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
 
-        {{ form.password.label }} {{ form.password(required='required') }}
+        <div class="am-form-group">
+            {{ form.password.label }}
+            {{ form.password(required='required') }}
+        </div>
         {% for error in form.password.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
 
-        {{ form.re_password.label }} {{ form.re_password(required='required') }}
+        <div class="am-form-group">
+            {{ form.re_password.label }}
+            {{ form.re_password(required='required') }}
+        </div>
         {% for error in form.re_password.errors %}
-            <strong style="color: red">{{ error }}</strong><br>
+            <div class="am-alert am-alert-danger" data-am-alert>
+                <button type="button" class="am-close">&times;</button>
+                <p>{{ error }}</p>
+            </div>
         {% endfor %}
 
-        {{ form.submit }}
-        <a href="{{ url_for('main.index') }}" class="pull-right"><button type="button">返回</button></a>
+        {{ form.submit(class='am-btn am-btn-primary') }}
+        <a href="{{ url_for('main.index') }}" class="pull-right"><button class="am-btn" type="button">返回</button></a>
 
     </form>
 

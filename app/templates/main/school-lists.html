@@ -9,16 +9,27 @@
 
 {% block content %}
 
-    <div>
-        <div id="city">
-            点击按钮获取相应信息
+    <div class="am-form">
+        <div class="am-form-group">
+            <label for="province">省</label>
+            <select name="province" id="province"></select>
+            <span class="am-form-caret"></span>
         </div>
-        <button id="get_province">获取省份</button>
-        <button id="get_district">获取市（区）</button>
-        <button id="get_county">获取县</button>
+        <div class="am-form-group">
+            <label for="district">市（区）</label>
+            <select name="district" id="district"></select>
+            <span class="am-form-caret"></span>
+        </div>
+        <div class="am-form-group">
+            <label for="county">县</label>
+            <select name="county" id="county"></select>
+            <span class="am-form-caret"></span>
+        </div>
+        <button class="am-btn am-btn-primary" id="get_district">获取市（区）</button>
+        <button class="am-btn am-btn-primary" id="get_county">获取县</button>
     </div>
 
-    <table class="table">
+    <table class="am-table">
         <thead>
         <tr>
             <td></td>
@@ -56,23 +67,82 @@
 
     <script>
         $(document).ready(function () {
-            $("#get_province").click(function () {
-                var city = $("#city");
+
+            var province = $("#province");
+            var district = $("#district");
+            var county = $("#county");
+
+            province.empty();
+            district.empty();
+            county.empty();
+
+            $.ajax({
+                url: $API_ROOT + '/province',
+                type: 'GET',
+                success: function(data) {
+                    province.empty();
+                    $.each(data.data, function (index, item) {
+                       var p = $("<option></option>");
+                       p.val(item.province);
+                       p.text(item.province).appendTo(province);
+                   });
+                },
+                error: function () {
+                    alert('数据加载失败，请重试');
+                }
+            });
+
+            province.change(function () {
+                district.empty();
+                county.empty();
+            });
+
+            $("#get_district").click(function () {
+
                 $.ajax({
-                    url: $API_ROOT + '/province',
+                    url: $API_ROOT + '/district',
                     type: 'GET',
-                    success: function(data) {
-                        city.empty();
+                    data: {'province': province.val()},
+                    success: function (data) {
+                        district.empty();
                         $.each(data.data, function (index, item) {
-                           var p = $("<p></p>");
-                           p.text(item.province).fadeIn(1000).appendTo(city);
-                       });
+                            var p = $("<option></option>");
+                            p.val(item.district);
+                            p.text(item.district).appendTo(district);
+                        });
                     },
                     error: function () {
-                        city.text('数据加载失败，请重试');
+                        alert('数据加载失败，请重试');
                     }
                 });
+
             });
+
+            district.change(function () {
+                county.empty();
+            });
+
+            $("#get_county").click(function () {
+
+                $.ajax({
+                    url: $API_ROOT + '/county',
+                    type: 'GET',
+                    data: {'province': province.val(), 'district': district.val()},
+                    success: function (data) {
+                        county.empty();
+                        $.each(data.data, function (index, item) {
+                            var p = $("<option></option>");
+                            p.val(item.id);
+                            p.text(item.county).appendTo(county);
+                        });
+                    },
+                    error: function () {
+                        alert('数据加载失败，请重试');
+                    }
+                });
+
+            });
+
         });
     </script>
 
