@@ -90,7 +90,6 @@
                        p.val(item.province);
                        p.text(item.province).appendTo(province);
                     });
-                    loading.modal('close');
                 },
                 error: function () {
                     $("#error-alert").modal();
@@ -133,6 +132,9 @@
                     },
                     error: function () {
                         $("#error-alert").modal();
+                    },
+                    complete: function () {
+                        loading.modal('close');
                     }
                 });
             });
