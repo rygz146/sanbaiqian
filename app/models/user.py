@@ -69,7 +69,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128))
     gender = db.Column(db.Boolean, default=True)
     phone = db.Column(db.String(20), unique=True)
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
     uniqueID = db.Column(db.String(32), unique=True)
     roles = db.relationship('Role',
                             secondary=users_to_roles,
@@ -164,7 +164,7 @@ class UploadFile(db.Model):
     name = db.Column(db.String(256), nullable=False)
     size = db.Column(db.Integer)
     md5_name = db.Column(db.String(32), nullable=False)
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     @classmethod
@@ -193,7 +193,7 @@ class Child(db.Model):
     school_class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'))
     parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     birthday = db.Column(db.Date())
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
 
     def __init__(self, **kwargs):
         super(Child, self).__init__(**kwargs)

@@ -8,6 +8,7 @@ import xlrd
 
 from sqlalchemy.exc import IntegrityError
 from random import seed
+from datetime import datetime
 
 from . import db
 
@@ -66,11 +67,21 @@ class School(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), nullable=False)
     address = db.Column(db.String(256))
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
     city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
     grades = db.relationship('SchoolGrade', backref='school', lazy='dynamic')
     classes = db.relationship('SchoolClass', backref='school', lazy='dynamic')
     students = db.relationship('Child', backref='school', lazy='dynamic')
+
+    def to_json(self):
+        return {
+            'name': self.name,
+            'province': self.city.province,
+            'district': self.city.district,
+            'county': self.city.county,
+            'zip_code': self.city.zip_code,
+            'create_time': self.create_time.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
     @staticmethod
     def generate_fake(count=10):
@@ -99,7 +110,7 @@ class SchoolGrade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
     classes = db.relationship('SchoolClass', backref='school_grade', lazy='dynamic')
 
     def __init__(self, **kwargs):
@@ -123,7 +134,7 @@ class SchoolClass(db.Model):
     name = db.Column(db.String(256), nullable=False)
     school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     school_grade_id = db.Column(db.Integer, db.ForeignKey('school_grade.id'))
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
     students = db.relationship('Child', backref='class', lazy='dynamic')
     schedule = db.relationship('ClassSchedule', backref='class', lazy='dynamic')
     teachers = db.relationship('SchoolClass',
@@ -206,7 +217,7 @@ class Lesson(db.Model):
     create_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     title = db.Column(db.String(512))
     content = db.Column(db.Text)
-    create_time = db.Column(db.DateTime(), default=db.func.now())
+    create_time = db.Column(db.DateTime(), default=datetime.now())
     files = db.relationship('UploadFile',
                             secondary=lessons_to_files,
                             backref=db.backref('lessons', lazy='dynamic'),

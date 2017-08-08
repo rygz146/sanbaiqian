@@ -46,10 +46,5 @@ def index():
 
 @main.route('/schools', methods=['GET', 'POST'])
 def school_lists():
-    page = request.args.get('page', 1, int)
-    pagination = School.query.paginate(page=page, per_page=5, error_out=False)
-    schools = pagination.items
 
-    return render_template('main/school-lists.html',
-                           pagination=pagination,
-                           schools=schools)
+    return render_template('main/school-lists.html')

@@ -1,6 +1,5 @@
 {% extends 'include/base.html' %}
 
-{% from 'macro/pagination.html' import render_pagination%}
 
 {% block nav %}
     {% include 'include/nav.html' %}
@@ -9,27 +8,44 @@
 
 {% block content %}
 
-    <div class="am-form">
-        <div class="am-form-group">
-            <label for="province">省</label>
-            <select name="province" id="province"></select>
-            <span class="am-form-caret"></span>
+    <div class="am-modal am-modal-loading am-modal-no-btn" tabindex="-1" id="modal-loading">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">数据载入中...</div>
+            <div class="am-modal-bd">
+            <span class="am-icon-spinner am-icon-spin"></span>
+            </div>
         </div>
-        <div class="am-form-group">
-            <label for="district">市（区）</label>
-            <select name="district" id="district"></select>
-            <span class="am-form-caret"></span>
-        </div>
-        <div class="am-form-group">
-            <label for="county">县</label>
-            <select name="county" id="county"></select>
-            <span class="am-form-caret"></span>
-        </div>
-        <button class="am-btn am-btn-primary" id="get_district">获取市（区）</button>
-        <button class="am-btn am-btn-primary" id="get_county">获取县</button>
     </div>
 
-    <table class="am-table">
+    <div class="am-modal am-modal-alert" tabindex="-1" id="error-alert">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">提示</div>
+            <div class="am-modal-bd">
+                数据加载失败，请重试！
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn">确定</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-form-inline">
+        <div class="am-form-group">
+            <label class="am-form-label" for="province">省</label>
+            <select name="province" id="province" data-am-selected="{searchBox: 1, btnStyle: 'secondary', maxHeight: 150}"></select>
+        </div>
+        <div class="am-form-group">
+            <label class="am-form-label" for="district">市（区）</label>
+            <select name="district" id="district" data-am-selected="{searchBox: 1, btnStyle: 'secondary', maxHeight: 150}"></select>
+        </div>
+        <div class="am-form-group">
+            <label class="am-form-label" for="county">县</label>
+            <select name="county" id="county" data-am-selected="{searchBox: 1, btnStyle: 'secondary', maxHeight: 150}"></select>
+        </div>
+        <button class="am-btn am-btn-success" id="get_school" data-am-loading="{spinner: 'circle-o-notch', loadingText: '加载中...'}">查询</button>
+    </div>
+    <br>
+    <table class="am-table am-table-radius am-table-bordered" id="schools">
         <thead>
         <tr>
             <td></td>
@@ -42,23 +58,9 @@
         </tr>
         </thead>
         <tbody>
-            {% for school in schools | sort(attribute='create_time') %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ school.name }}</td>
-                    <td>{{ school.city.province }}</td>
-                    <td>{{ school.city.district }}</td>
-                    <td>{{ school.city.county }}</td>
-                    <td>{{ school.city.zip_code }}</td>
-                    <td>{{ school.create_time }}</td>
-                </tr>
-            {% endfor %}
+
         </tbody>
     </table>
-
-    {% if pagination %}
-        {{ render_pagination(pagination, 'main.school_lists') }}
-    {% endif %}
 
 {% endblock %}
 
@@ -68,10 +70,12 @@
     <script>
         $(document).ready(function () {
 
+            var loading = $("#modal-loading");
             var province = $("#province");
             var district = $("#district");
             var county = $("#county");
 
+            loading.modal();
             province.empty();
             district.empty();
             county.empty();
@@ -85,26 +89,23 @@
                        var p = $("<option></option>");
                        p.val(item.province);
                        p.text(item.province).appendTo(province);
-                   });
+                    });
+                    loading.modal('close');
                 },
                 error: function () {
-                    alert('数据加载失败，请重试');
+                    $("#error-alert").modal();
                 }
             });
 
-            province.change(function () {
+            province.change(function (e) {
+                e.preventDefault();
                 district.empty();
                 county.empty();
-            });
-
-            $("#get_district").click(function () {
-
                 $.ajax({
                     url: $API_ROOT + '/district',
                     type: 'GET',
                     data: {'province': province.val()},
                     success: function (data) {
-                        district.empty();
                         $.each(data.data, function (index, item) {
                             var p = $("<option></option>");
                             p.val(item.district);
@@ -112,24 +113,18 @@
                         });
                     },
                     error: function () {
-                        alert('数据加载失败，请重试');
+                        $("#error-alert").modal();
                     }
                 });
-
             });
 
             district.change(function () {
                 county.empty();
-            });
-
-            $("#get_county").click(function () {
-
                 $.ajax({
                     url: $API_ROOT + '/county',
                     type: 'GET',
                     data: {'province': province.val(), 'district': district.val()},
                     success: function (data) {
-                        county.empty();
                         $.each(data.data, function (index, item) {
                             var p = $("<option></option>");
                             p.val(item.id);
@@ -137,12 +132,48 @@
                         });
                     },
                     error: function () {
-                        alert('数据加载失败，请重试');
+                        $("#error-alert").modal();
+                    }
+                });
+            });
+
+            $("#get_school").click(function () {
+
+                var school = $("#schools").find('tbody');
+                school.empty();
+                var btn = $(this);
+                btn.button('loading');
+                btn.addClass('am-disabled');
+                $.ajax({
+                    url: $API_ROOT + '/schools',
+                    type: 'GET',
+                    data: {'city_id': county.val()},
+                    success: function (data) {
+                        $.each(data.data, function (index, item) {
+                            var num = data.data.indexOf(item) + 1;
+                            var tr = $("<tr>" +
+                                "<td>" + num + "</td>" +
+                                "<td>" + item.name + "</td>" +
+                                "<td>" + item.province + "</td>" +
+                                "<td>" + item.district + "</td>" +
+                                "<td>" + item.county + "</td>" +
+                                "<td>" + item.zip_code + "</td>" +
+                                "<td>" + item.create_time + "</td>" +
+                                "</tr>");
+                            school.append(tr);
+                        });
+                    },
+                    error: function () {
+                        $("#error-alert").modal();
+                    },
+                    complete: function () {
+                        btn.removeClass('am-disabled');
+                        btn.button('reset');
                     }
                 });
 
             });
-
+            
         });
     </script>
 

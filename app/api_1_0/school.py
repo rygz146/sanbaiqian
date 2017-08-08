@@ -10,7 +10,7 @@ school
 from flask import request
 
 from app.log import Logger
-from app.utils import json_response
+from app.utils import json_response, json_page_response
 
 from . import api
 from ..models import db
@@ -45,3 +45,14 @@ def get_county():
     data = [{'id': c.id, 'county': c.county, 'zip_code': c.zip_code} for c in counties]
 
     return json_response(200, data)
+
+
+@api.route('/schools')
+def get_schools():
+    page = request.args.get('page', 1)
+    city_id = request.args.get('city_id', 1)
+    pagination = City.query.filter_by(id=city_id).first().schools.paginate(page=page, per_page=5, error_out=False)
+    schools = pagination.items
+    data = [s.to_json() for s in schools]
+
+    return json_page_response(200, pagination, data)
