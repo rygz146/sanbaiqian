@@ -10,7 +10,7 @@
 
     <div class="am-modal am-modal-loading am-modal-no-btn" tabindex="-1" id="modal-loading">
         <div class="am-modal-dialog">
-            <div class="am-modal-hd">数据载入中...</div>
+            <div class="am-modal-hd">数据初始化中...</div>
             <div class="am-modal-bd">
             <span class="am-icon-spinner am-icon-spin"></span>
             </div>
@@ -33,14 +33,17 @@
         <div class="am-form-group">
             <label class="am-form-label" for="province">省</label>
             <select name="province" id="province" data-am-selected="{searchBox: 1, btnStyle: 'secondary', maxHeight: 150}"></select>
+            <span class="am-form-caret"></span>
         </div>
         <div class="am-form-group">
             <label class="am-form-label" for="district">市（区）</label>
             <select name="district" id="district" data-am-selected="{searchBox: 1, btnStyle: 'secondary', maxHeight: 150}"></select>
+            <span class="am-form-caret"></span>
         </div>
         <div class="am-form-group">
             <label class="am-form-label" for="county">县</label>
             <select name="county" id="county" data-am-selected="{searchBox: 1, btnStyle: 'secondary', maxHeight: 150}"></select>
+            <span class="am-form-caret"></span>
         </div>
         <button class="am-btn am-btn-success" id="get_school" data-am-loading="{spinner: 'circle-o-notch', loadingText: '加载中...'}">查询</button>
     </div>
@@ -54,7 +57,7 @@
             <td>市（区）</td>
             <td>县</td>
             <td>邮编</td>
-            <td>创建时间</td>
+            <td>加入时间</td>
         </tr>
         </thead>
         <tbody>
@@ -76,9 +79,6 @@
             var county = $("#county");
 
             loading.modal();
-            province.empty();
-            district.empty();
-            county.empty();
 
             $.ajax({
                 url: $API_ROOT + '/province',
@@ -96,8 +96,7 @@
                 }
             });
 
-            province.change(function (e) {
-                e.preventDefault();
+            province.change(function () {
                 district.empty();
                 county.empty();
                 $.ajax({

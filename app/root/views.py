@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/18
 # @Author : trl
-from flask import abort, render_template, request
+from flask import abort, render_template, request, redirect, url_for
 
 from app.root import root
-from app.models.user import root_permission, User, School
+from app.models.user import root_permission, User, School, db
 from app.log import Logger
 
 
@@ -44,3 +44,16 @@ def school_lists():
     return render_template('root/school-lists.html',
                            pagination=pagination,
                            schools=schools)
+
+
+@root.route('/schools/<manage>', methods=['GET', 'POST'])
+def school_manage(manage):
+    if manage == 'add' and request.method == 'POST':
+        form = request.form
+        if form.get('name'):
+            school = School(name=form.get('name'),
+                            address=form.get("address"),
+                            city_id=form.get("city_id"))
+            db.session.add(school)
+            db.session.commit()
+    return redirect(url_for('.school_lists'))

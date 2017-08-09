@@ -11,6 +11,72 @@
 
     {% include 'root/nav.html' %}
 
+    <button type="button" class="am-btn am-btn-secondary" id="school-add">增加</button>
+
+    <div class="am-modal am-modal-prompt" tabindex="-1" id="school-add-modal">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">增加学校</div>
+            <div class="am-modal-bd">
+                <form class="am-form am-form-horizontal" data-am-validator id="school-add-form" action="{{ url_for('root.school_manage', manage='add') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <fieldset>
+                    <div class="am-form-group">
+                        <div class="am-u-sm-3 am-form-label">
+                            <label for="province">省</label>
+                        </div>
+                        <div class="am-u-sm-9">
+                            <select name="province" id="province"></select>
+                            <span class="am-form-caret"></span>
+                        </div>
+                    </div>
+
+                    <div class="am-form-group">
+                        <div class="am-u-sm-3 am-form-label">
+                            <label for="district">市（区）</label>
+                        </div>
+                        <div class="am-u-sm-9">
+                            <select name="district" id="district"></select>
+                            <span class="am-form-caret"></span>
+                        </div>
+                    </div>
+
+                    <div class="am-form-group">
+                        <div class="am-u-sm-3 am-form-label">
+                            <label for="county">县</label>
+                        </div>
+                        <div class="am-u-sm-9">
+                            <select name="city_id" id="county"></select>
+                            <span class="am-form-caret"></span>
+                        </div>
+                    </div>
+
+                    <div class="am-form-group">
+                        <div class="am-u-sm-3 am-form-label">
+                            <label for="school-name">学校名称</label>
+                        </div>
+                        <div class="am-u-sm-9">
+                            <input type="text" id="school-name" name="name" minlength="3" required>
+                        </div>
+                    </div>
+
+                    <div class="am-form-group">
+                        <div class="am-u-sm-3 am-form-label">
+                            <label for="school-address">地址</label>
+                        </div>
+                        <div class="am-u-sm-9">
+                            <input type="text" id="school-address" name="address">
+                        </div>
+                    </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+                <span class="am-modal-btn" data-am-modal-confirm>提交</span>
+            </div>
+        </div>
+    </div>
+
     <table class="am-table">
         <thead>
         <tr>
@@ -41,5 +107,119 @@
     {% if pagination %}
         {{ render_pagination(pagination, 'root.school_lists') }}
     {% endif %}
+
+{% endblock %}
+
+
+{% block javascript %}
+
+    <script>
+
+    $(document).ready(function () {
+
+        var province = $("#province");
+        var district = $("#district");
+        var county = $("#county");
+        var school_add_form =$("#school-add-form");
+
+        <!--根据省获取市（区）-->
+        function get_district() {
+            $.ajax({
+                url: $API_ROOT + '/district',
+                type: 'GET',
+                data: {'province': province.val()},
+                success: function (data) {
+                    $.each(data.data, function (index, item) {
+                        var p = $("<option></option>");
+                        p.val(item.district);
+                        p.text(item.district).appendTo(district);
+                    });
+                    get_county();
+                },
+                error: function () {
+                    alert('获取市（区）数据失败，请重试');
+                }
+            });
+        }
+
+        <!--根据市（区）获取县-->
+        function get_county() {
+            $.ajax({
+                url: $API_ROOT + '/county',
+                type: 'GET',
+                data: {'province': province.val(), 'district': district.val()},
+                success: function (data) {
+                    $.each(data.data, function (index, item) {
+                        var p = $("<option></option>");
+                        p.val(item.id);
+                        p.text(item.county).appendTo(county);
+                    });
+                },
+                error: function () {
+                    alert('获取县数据失败，请重试');
+                }
+            });
+        }
+
+        province.change(function () {
+                district.empty();
+                county.empty();
+                get_district();
+            });
+
+        district.change(function () {
+            county.empty();
+            get_county();
+        });
+
+        $("#school-add").click(function () {
+
+            district.empty();
+            county.empty();
+
+            $("#school-add-modal").modal({
+                closeOnConfirm: false,
+                onConfirm: function () {
+                    school_add_form.submit();
+                }
+            });
+
+            $.ajax({
+                url: $API_ROOT + '/province',
+                type: 'GET',
+                success: function(data) {
+                    province.empty();
+                    $.each(data.data, function (index, item) {
+                       var p = $("<option></option>");
+                       p.val(item.province);
+                       p.text(item.province).appendTo(province);
+                    });
+                    $.ajax({
+                        url: $API_ROOT + '/district',
+                        type: 'GET',
+                        data: {'province': province.val()},
+                        success: function (data) {
+                            $.each(data.data, function (index, item) {
+                                var p = $("<option></option>");
+                                p.val(item.district);
+                                p.text(item.district).appendTo(district);
+                            });
+                            get_county();
+                        },
+                        error: function () {
+                            alert('获取市（区）数据失败，请重试');
+                        }
+                    });
+                },
+                error: function () {
+                    alert('获取省数据失败，请重试');
+                }
+            });
+
+        });
+
+    });
+
+    </script>
 
 {% endblock %}

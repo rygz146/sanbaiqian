@@ -56,9 +56,12 @@
 <!--<![endif]-->
 
 <script type="text/javascript">
+
     $API_ROOT = {{ request.url_root|tojson|safe }} + 'api';
     $URL_ROOT = {{ request.url_root|tojson|safe }};
+
     var csrf_token = $('meta[name=csrf-token]').attr('content');
+    var progress = $.AMUI.progress;
 
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
@@ -67,6 +70,15 @@
             }
         }
     });
+
+    $(document).ajaxStart(function () {
+       progress.start();
+    });
+
+    $(document).ajaxStop(function () {
+        progress.done();
+    });
+
 </script>
 {% block javascript %}{% endblock %}
 </html>
