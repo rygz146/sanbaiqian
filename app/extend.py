@@ -96,7 +96,7 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
 login_manager.login_message = u"当前页面需要登录才可访问"
-login_manager.login_message_category = "info"
+login_manager.login_message_category = "warning"
 
 
 @login_manager.user_loader
