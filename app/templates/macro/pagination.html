@@ -1,5 +1,5 @@
 {% macro render_pagination(pagination, endpoint) %}
-  <ul class="am-pagination">
+  <ul class="am-pagination" id="pagination">
     <li{% if not pagination.has_prev %} class="am-disabled"{% endif %}>
         <a href="{% if pagination.has_prev %}{{ url_for(endpoint, page=pagination.prev_num) }}{% else %}javascript:void (0);{% endif %}">
             <span class="am-icon-angle-double-left"></span>

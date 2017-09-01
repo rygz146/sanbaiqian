@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/13
 # @Author : trl
+
 from flask_wtf.form import FlaskForm
 from wtforms import FileField, SubmitField
 from wtforms.validators import DataRequired

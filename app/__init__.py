@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
-import sys
-from flask import Flask, g
 
+import sys
+
+from flask import Flask, g
 from flask_login import current_user
 from flask_principal import identity_loaded, UserNeed, RoleNeed
 from flask_uploads import configure_uploads, patch_request_class
@@ -17,7 +18,6 @@ from .extend import (login_manager,
                      principal,
                      my_template_filter,
                      my_error_handler)
-
 
 reload(sys)
 sys.setdefaultencoding('utf-8')

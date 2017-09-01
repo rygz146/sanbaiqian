@@ -1,6 +1,6 @@
 {% extends 'include/base.html' %}
 
-{% from 'macro/pagination.html' import render_pagination%}
+{% from 'macro/pagination.html' import render_pagination %}
 
 {% block nav %}
     {% include 'include/nav.html' %}
@@ -10,6 +10,37 @@
 {% block content %}
 
     {% include 'root/nav.html' %}
+
+    <div class="am-modal am-modal-alert" tabindex="-1" id="error-alert">
+        <div class="am-modal-dialog">
+            <div class="am-modal-hd">提示</div>
+            <div class="am-modal-bd">
+                数据加载失败，请重试！
+            </div>
+            <div class="am-modal-footer">
+                <span class="am-modal-btn">确定</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="am-g">
+        <div class="am-u-sm-2">
+            <select name="query" id="query" class="am-form-field" data-am-selected="{btnStyle: 'default'}">
+                <option value="all">全部</option>
+                <option value="parent">家长</option>
+                <option value="teacher">教师</option>
+                <option value="admin">学校管理员</option>
+            </select>
+        </div>
+        <div class="am-u-sm-6">
+            <div class="am-input-group am-input-group-default">
+                <input type="text" class="am-form-field" placeholder="输入姓名查询">
+                <span class="am-input-group-btn">
+                    <button class="am-btn am-btn-default" type="button"><span class="am-icon-search"></span></button>
+                </span>
+            </div>
+        </div>
+    </div>
 
     <table class="am-table">
         <thead>
@@ -24,24 +55,74 @@
             <td>创建时间</td>
         </tr>
         </thead>
-        <tbody>
-            {% for user in users | sort(attribute='create_time') %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ user.username }}</td>
-                    <td>{% for role in user.roles.all() %}{{ role.name | role }} {% endfor %}</td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.gender | gender }}</td>
-                    <td>{% for school in user.schools %}{{ school.name }}{% endfor %}</td>
-                    <td>{% for school in user.schools %}{{ school.city.zip_code }}{% endfor %}</td>
-                    <td>{{ user.create_time }}</td>
-                </tr>
-            {% endfor %}
+        <tbody id="users">
+        {% for user in users | sort(attribute='create_time', reverse=true) %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ user.username }}</td>
+                <td>{% for role in user.roles.all() %}{{ role.name | role }} {% endfor %}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.gender | gender }}</td>
+                {% if user.school %}
+                    <td>{{ user.school.name }}</td>
+                    <td>{{ user.school.city.zip_code }}</td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                {% endif %}
+                <td>{{ user.create_time | format() }}</td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 
     {% if pagination %}
         {{ render_pagination(pagination, 'root.user_lists') }}
     {% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script>
+        $(document).ready(function () {
+            var query = $('#query');
+            var users = $('#users');
+            var pagination = $('#pagination');
+            var error_alert = $("#error-alert");
+
+            query.change(function () {
+                $.ajax({
+                    url: $API_ROOT + '/users',
+                    type: 'GET',
+                    data: {'query': query.val()},
+                    success: function (data) {
+                        users.empty();
+                        pagination.empty();
+                        $.each(data.data, function (index, item) {
+                            var tr = $("<tr>" +
+                                "<td>" + (index + 1) + "</td>" +
+                                "<td>" + item.username + "</td>" +
+                                "<td>" + item.roles + "</td>" +
+                                "<td>" + item.name + "</td>" +
+                                "<td>" + item.gender + "</td>" +
+                                "<td>" + (item.school && item.school.name) + "</td>" +
+                                "<td>" + (item.school && item.school.zip_code) + "</td>" +
+                                "<td>" + item.create_time + "</td>" +
+                                "</tr>");
+                            users.append(tr);
+                        });
+                        var li_prev = $('<li><span class="am-icon-angle-double-left"></span></li>');
+                        var li_next = $('<li><span class="am-icon-angle-double-right"></span></li>');
+                        var li_all = [li_prev, li_next];
+                        pagination.append(li_all);
+                    },
+                    error: function () {
+                        error_alert.modal();
+                    }
+                })
+            });
+        })
+    </script>
 
 {% endblock %}

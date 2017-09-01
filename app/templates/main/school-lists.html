@@ -10,7 +10,7 @@
 
     <div class="am-modal am-modal-loading am-modal-no-btn" tabindex="-1" id="modal-loading">
         <div class="am-modal-dialog">
-            <div class="am-modal-hd">数据初始化中...</div>
+            <div class="am-modal-hd">数据获取中...</div>
             <div class="am-modal-bd">
             <span class="am-icon-spinner am-icon-spin"></span>
             </div>
@@ -77,6 +77,7 @@
             var province = $("#province");
             var district = $("#district");
             var county = $("#county");
+            var error_alert = $("#error-alert");
 
             loading.modal();
 
@@ -92,7 +93,8 @@
                     });
                 },
                 error: function () {
-                    $("#error-alert").modal();
+                    loading.modal('close');
+                    error_alert.modal();
                 }
             });
 
@@ -111,7 +113,8 @@
                         });
                     },
                     error: function () {
-                        $("#error-alert").modal();
+                        loading.modal('close');
+                        error_alert.modal();
                     }
                 });
             });
@@ -130,7 +133,8 @@
                         });
                     },
                     error: function () {
-                        $("#error-alert").modal();
+                        loading.modal('close');
+                        error_alert.modal();
                     },
                     complete: function () {
                         loading.modal('close');
@@ -151,9 +155,8 @@
                     data: {'city_id': county.val()},
                     success: function (data) {
                         $.each(data.data, function (index, item) {
-                            var num = data.data.indexOf(item) + 1;
                             var tr = $("<tr>" +
-                                "<td>" + num + "</td>" +
+                                "<td>" + (index + 1) + "</td>" +
                                 "<td>" + item.name + "</td>" +
                                 "<td>" + item.province + "</td>" +
                                 "<td>" + item.district + "</td>" +
@@ -165,7 +168,8 @@
                         });
                     },
                     error: function () {
-                        $("#error-alert").modal();
+                        loading.modal('close');
+                        error_alert.modal();
                     },
                     complete: function () {
                         btn.removeClass('am-disabled');

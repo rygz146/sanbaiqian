@@ -9,6 +9,7 @@ from app import create_app
 from app.config import DevelopmentConfig
 from app.models import db, school, user
 
+
 app = create_app(DevelopmentConfig)
 
 manager = Manager(app)

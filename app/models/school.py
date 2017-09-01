@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
+
 import forgery_py
 import os
 import xlrd
@@ -69,6 +70,7 @@ class School(db.Model):
     address = db.Column(db.String(256))
     create_time = db.Column(db.DateTime(), default=datetime.now())
     city_id = db.Column(db.Integer, db.ForeignKey('city.id'))
+    users = db.relationship('User', backref='school', lazy='dynamic')
     grades = db.relationship('SchoolGrade', backref='school', lazy='dynamic')
     classes = db.relationship('SchoolClass', backref='school', lazy='dynamic')
     students = db.relationship('Child', backref='school', lazy='dynamic')

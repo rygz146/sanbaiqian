@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/18
 # @Author : trl
+
 from flask import abort, render_template, request, redirect, url_for
 
-from app.root import root
-from app.models.user import root_permission, User, School, db
-from app.log import Logger
+from . import root
+from ..models.user import root_permission, User, School, db
+from ..log import Logger
 
 
 root_log = Logger('root_log', 'root.log', True)

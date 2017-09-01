@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
+
 import os
 
 from flask_uploads import DEFAULTS, AUDIO, ARCHIVES

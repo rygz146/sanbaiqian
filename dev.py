@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
+
 from app import create_app
 from app.config import DevelopmentConfig
+
 
 app = create_app(DevelopmentConfig)
 

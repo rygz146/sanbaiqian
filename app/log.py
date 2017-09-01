@@ -2,15 +2,18 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/13
 # @Author : trl
+
 """
-日志公共类初始化方法
+app.log
 ~~~~~~~~~~~~~~~~~~~~
 
+日志公共类初始化方法
 不加参数则生成实例后自动记录console的内容
 log_name: 日志名字
 log_file: 日志文件
 log_debug: True 开启调试，false 关闭调试
 """
+
 import os
 import logging
 

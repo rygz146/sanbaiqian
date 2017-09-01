@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/21
 # @Author : trl
+
 """
 app.data_spider.zip_code
 ~~~~~~~~~~~~~~~~~~~~
 
 获取全国邮编，但是数据处理没做好，需要再完善
 """
+
 import requests
 
 from bs4 import BeautifulSoup

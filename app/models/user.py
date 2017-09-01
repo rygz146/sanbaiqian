@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
+
 import forgery_py
 import uuid
 
@@ -15,19 +16,25 @@ from flask import current_app
 from flask_principal import Permission, RoleNeed
 from sqlalchemy.exc import IntegrityError
 from random import seed, choice
-from school import School
 from datetime import datetime
 from hashlib import md5
 
 from . import db
+from .school import School
 
-
+# ==================角色定义=======================
 ROLES = ['root', 'admin', 'teacher', 'parent']
-
+ROLES_MAP = {
+    'root': '站点管理员',
+    'admin': '学校管理员',
+    'teacher': '教师',
+    'parent': '家长'
+}
 root_permission = Permission(RoleNeed('root'))
 admin_permission = Permission(RoleNeed('admin'))
 teacher_permission = Permission(RoleNeed('teacher'))
 parent_permission = Permission(RoleNeed('parent'))
+# ==================权限声明=======================
 
 
 class Role(db.Model):
@@ -53,13 +60,6 @@ users_to_roles = db.Table(
 )
 
 
-users_schools = db.Table(
-    'users_to_schools',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('school_id', db.Integer, db.ForeignKey('school.id'))
-)
-
-
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
 
@@ -75,10 +75,7 @@ class User(db.Model, UserMixin):
                             secondary=users_to_roles,
                             backref=db.backref('users', lazy='dynamic'),
                             lazy='dynamic')
-    schools = db.relationship('School',
-                              secondary=users_schools,
-                              backref=db.backref('users', lazy='dynamic'),
-                              lazy='dynamic')
+    school_id = db.Column(db.Integer, db.ForeignKey('school.id'))
     files = db.relationship('UploadFile', backref='user', lazy='dynamic')
     children = db.relationship('Child', backref='parent', lazy='dynamic')
 
@@ -137,16 +134,27 @@ class User(db.Model, UserMixin):
             u = User(username=forgery_py.internet.user_name(True),
                      password='123456',
                      name=forgery_py.internet.user_name(),
+                     school=s,
                      gender=choice([True, False]),
                      create_time=forgery_py.date.date(past=True),
                      phone=forgery_py.address.phone())
-            u.schools.append(s)
             u.roles.append(r)
             db.session.add(u)
             try:
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'roles': [ROLES_MAP.get(r.name) for r in self.roles],
+            'name': self.name,
+            'gender': '男' if self.gender else '女',
+            'school': self.school.to_json() if self.school else None,
+            'create_time': self.create_time.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)

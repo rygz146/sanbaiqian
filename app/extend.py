@@ -18,7 +18,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_principal import Principal
 from flask_uploads import UploadSet
 
-from .models import user
+from .models.user import User
 
 
 files = UploadSet('files')
@@ -101,7 +101,7 @@ login_manager.login_message_category = "warning"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return user.User.query.get(user_id)
+    return User.query.get(user_id)
 
 
 toolbar = DebugToolbarExtension()

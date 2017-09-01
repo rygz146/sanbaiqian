@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/18
 # @Author : trl
+
 from flask import abort, render_template
 
 from . import admin

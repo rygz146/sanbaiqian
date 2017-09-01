@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
-from flask import current_app, render_template, abort, request, g
+
+from flask import current_app, render_template, abort, request
 from flask_sqlalchemy import get_debug_queries
 
-from app.log import Logger, slow_query_log
-
+from ..log import Logger, slow_query_log
 from . import main
-from ..models.school import School
+
 
 main_log = Logger('main_log', 'main.log', True)
 

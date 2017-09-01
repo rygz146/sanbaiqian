@@ -1,11 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 """
 app.utils
 ~~~~~~~~~~~~~~~~~~~~
 
-something introduce
+自定义的一些方法
 """
+
 from flask import jsonify
 
 
@@ -15,7 +17,7 @@ def json_response(status_code, data, msg='success'):
     return jsonify(ret)
 
 
-def json_page_response(status_code, pagination, data, msg='success',):
+def json_page_response(status_code, pagination, data, msg='success'):
     ret = dict(status_code=status_code,
                msg=msg,
                total_num=pagination.pages,

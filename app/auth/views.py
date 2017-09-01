@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Date   : 2017/7/12
 # @Author : trl
+
 import os
 
 from flask_login import login_user, logout_user, login_required, current_user
@@ -15,9 +16,8 @@ from flask import (render_template,
                    abort,
                    send_from_directory)
 
-from app.log import Logger
-from app.extend import files
-
+from ..log import Logger
+from ..extend import files
 from . import auth
 from ..models.user import db, User, UploadFile, Role
 from ..forms.user import LoginForm, RegisterForm

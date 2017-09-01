@@ -11,7 +11,7 @@
 
     {% include 'parent/nav.html' %}
 
-    <form class="am-form" action="{{ url_for('parent.manage_child', do_type='add') }}" method="post">
+    <form class="am-form" action="{{ url_for('parent.manage_child', do_type='add') }}" method="post" data-am-validator>
 
         {{ form.hidden_tag() }}
 
@@ -40,7 +40,7 @@
         <div class="am-form-group">
             {{ form.birthday.label }}
             <div class="am-input-group am-datepicker-date" data-am-datepicker="{format: 'yyyy-mm-dd', viewMode: 'years'}">
-                {{ form.birthday(class="am-form-field", readonly='readonly', require='required') }}
+                {{ form.birthday(class="am-form-field", readonly='readonly', required='required') }}
                 <span class="am-input-group-btn am-datepicker-add-on">
                     <button class="am-btn am-btn-default" type="button">
                         <span class="am-icon-calendar"></span>
@@ -68,6 +68,7 @@
             <td>生日</td>
             <td>学校</td>
             <td>班级</td>
+            <td>管理</td>
         </tr>
         </thead>
         <tbody>
@@ -79,6 +80,7 @@
                     <td>{{ child.birthday }}</td>
                     <td>{{ child.school.name }}</td>
                     <td>{{ child.class.name }}</td>
+                    <td><a href="{{ url_for('parent.manage_child', do_type='delete', id=child.id) }}">删除</a></td>
                 </tr>
             {% endfor %}
         </tbody>
