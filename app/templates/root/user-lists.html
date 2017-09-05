@@ -90,12 +90,13 @@
             var users = $('#users');
             var pagination = $('#pagination');
             var error_alert = $("#error-alert");
+            var page = pagination.find('.am-active>a').html();
 
-            query.change(function () {
+            function get_users (query_type, page_num) {
                 $.ajax({
                     url: $API_ROOT + '/users',
                     type: 'GET',
-                    data: {'query': query.val()},
+                    data: {'query': query_type, 'page': page_num},
                     success: function (data) {
                         users.empty();
                         pagination.empty();
@@ -103,7 +104,7 @@
                             var tr = $("<tr>" +
                                 "<td>" + (index + 1) + "</td>" +
                                 "<td>" + item.username + "</td>" +
-                                "<td>" + item.roles + "</td>" +
+                                "<td>" + item.roles.join(' ') + "</td>" +
                                 "<td>" + item.name + "</td>" +
                                 "<td>" + item.gender + "</td>" +
                                 "<td>" + (item.school && item.school.name) + "</td>" +
@@ -112,16 +113,57 @@
                                 "</tr>");
                             users.append(tr);
                         });
+                        var current_num = Number(data.current_num);
+                        var prev_num = Number(data.prev_num);
+                        var next_num = Number(data.next_num);
+                        var total_num = Number(data.total_num);
+
                         var li_prev = $('<li><span class="am-icon-angle-double-left"></span></li>');
+                        if (prev_num === 0) {
+                            li_prev.addClass('am-disabled');
+                        }else {
+                            li_prev.on('click', function () {
+                                get_users(query.val(), prev_num);
+                            })
+                        }
+
                         var li_next = $('<li><span class="am-icon-angle-double-right"></span></li>');
-                        var li_all = [li_prev, li_next];
+                        if (next_num === 0) {
+                            li_next.addClass('am-disabled');
+                        }else {
+                            li_next.on('click', function () {
+                                get_users(query.val(), next_num);
+                            })
+                        }
+
+                        var li_all = [li_prev];
+                        for(var i=1; i<=total_num; i++){
+                            var li = $('<li><a>' + i + '</a></li>');
+                            if (i === current_num) {
+                                li.addClass('am-active');
+                            }else {
+                                li.find('a').on('click', function () {
+                                    get_users(query.val(), $(this).html());
+                                });
+                            }
+                            li_all.push(li);
+                        }
+                        li_all.push(li_next);
                         pagination.append(li_all);
                     },
                     error: function () {
                         error_alert.modal();
                     }
                 })
+            }
+
+            get_users(query.val(), page);
+
+            query.change(function() {
+                var query_type = $(this).val();
+                get_users(query_type, page);
             });
+
         })
     </script>
 
