@@ -39,7 +39,7 @@ SQLAlchemy==1.1.11
 tblib==1.3.2
 tornado==4.5.1
 u-msgpack-python==2.4.1
-urllib3==1.21.1
+urllib3==1.26.5
 Werkzeug==0.12.2
 WsgiDAV==2.2.2
 WTForms==2.1
